@@ -322,13 +322,11 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
           <span id="figHint">Move to bend it. Click to redraw.</span>
         </figcaption>
         <div class="filters figs" role="group" aria-label="Choose a drawing">
-          <button type="button" id="fig-1" aria-pressed="true">1 Flow</button>
-          <button type="button" id="fig-2" aria-pressed="false">2 Tree</button>
-          <button type="button" id="fig-3" aria-pressed="false">3 Nodes</button>
-          <button type="button" id="fig-4" aria-pressed="false">4 Life</button>
-          <button type="button" id="fig-5" aria-pressed="false">5 Ink</button>
-          <button type="button" id="fig-6" aria-pressed="false">6 Type</button>
-          <button type="button" id="fig-7" aria-pressed="false">7 Contours</button>
+          <button type="button" id="fig-1" data-fig="flow" aria-pressed="true">1 Flow</button>
+          <button type="button" id="fig-2" data-fig="nodes" aria-pressed="false">2 Nodes</button>
+          <button type="button" id="fig-3" data-fig="life" aria-pressed="false">3 Life</button>
+          <button type="button" id="fig-4" data-fig="ink" aria-pressed="false">4 Ink</button>
+          <button type="button" id="fig-5" data-fig="contours" aria-pressed="false">5 Contours</button>
         </div>
       </figure>
     </div>
@@ -523,7 +521,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
     };
   }
 
-  /* ---------- Hero figures: seven drawings sharing one canvas ---------- */
+  /* ---------- Hero figures: five drawings sharing one canvas ---------- */
   var canvas = document.getElementById('fieldCanvas');
   var ctx = canvas.getContext('2d');
   var fieldBtn = document.getElementById('field');
@@ -564,42 +562,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
       },
       click: function () { start(); }
     },
-    { // 2. growing tree: every branch splits in two
-      hint: 'Click to plant another. Move to lean it.', still: 1200,
-      init: function () { wash(); this.tips = []; this.plant(W / 2, H); return 'growing tree, each branch splits in two'; },
-      plant: function (x, y) {
-        var len = Math.max(H * 0.08, Math.min(H * 0.24, y * 0.26)) * (0.85 + rnd(0.3));
-        this.tips.push({ x: x, y: y, a: -Math.PI / 2, len: len, left: len, w: 6.5 * D, d: 0 });
-      },
-      frame: function () {
-        ctx.lineCap = 'round';
-        for (var k = 0; k < 2; k++) {
-          var next = [];
-          for (var i = 0; i < this.tips.length; i++) {
-            var t = this.tips[i], sp = 1.7 * D;
-            t.a += (Math.random() - 0.5) * 0.09 + (pointer ? (pointer.x - t.x) / W * 0.012 : 0);
-            var nx = t.x + Math.cos(t.a) * sp, ny = t.y + Math.sin(t.a) * sp;
-            ctx.strokeStyle = t.d >= 6 ? C.accent : C.ink; ctx.lineWidth = Math.max(0.7 * D, t.w);
-            ctx.beginPath(); ctx.moveTo(t.x, t.y); ctx.lineTo(nx, ny); ctx.stroke();
-            t.x = nx; t.y = ny; t.left -= sp;
-            if (t.left > 0) { next.push(t); continue; }
-            if (t.d < 8) {
-              for (var s = -1; s <= 1; s += 2) {
-                var l = t.len * (0.66 + rnd(0.14));
-                next.push({ x: t.x, y: t.y, a: t.a + s * (0.22 + rnd(0.42)), len: l, left: l, w: t.w * 0.7, d: t.d + 1 });
-              }
-            } else {
-              ctx.fillStyle = Math.random() < 0.6 ? C.hot : C.accent;
-              ctx.beginPath(); ctx.arc(t.x, t.y, 2.4 * D, 0, Math.PI * 2); ctx.fill();
-            }
-          }
-          this.tips = next;
-        }
-        return this.tips.length > 0;
-      },
-      click: function () { var s = spot(); this.plant(s.x, s.y); }
-    },
-    { // 3. constellation: nodes link up when they come close
+    { // 2. constellation: nodes link up when they come close
       hint: 'Move to gather them. Click to scatter.', still: 1,
       init: function () {
         this.n = [];
@@ -648,7 +611,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
         });
       }
     },
-    { // 4. cellular automaton: Conway's Game of Life
+    { // 3. cellular automaton: Conway's Game of Life
       hint: 'Draw on it. Click to drop a burst.', still: 1,
       init: function () {
         this.cs = Math.max(7 * D, Math.round(W / 46));
@@ -690,7 +653,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
       },
       click: function () { var s = spot(); this.paint(s.x, s.y, 4, 0.5); }
     },
-    { // 5. ink in water: drops carried by a slow current
+    { // 4. ink in water: drops carried by a slow current
       hint: 'Drag to stir. Click to add a drop.', still: 90,
       init: function () {
         ctx.clearRect(0, 0, W, H); this.p = []; this.t = rnd(50); this.k = 0;
@@ -728,50 +691,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
       },
       click: function () { var s = spot(); this.drop(s.x, s.y); }
     },
-    { // 6. particle type: a word that scatters and comes back
-      hint: 'Move to push it apart. Click for the next word.', still: 1,
-      words: ['code', 'coffee', 'fun'], wi: 0, p: [],
-      init: function () { this.wi = 0; this.p = []; this.build(true); return this.title(); },
-      title: function () { return 'particle type, the word "' + this.words[this.wi] + '"'; },
-      build: function (fresh) {
-        var word = this.words[this.wi], o = document.createElement('canvas'), c = o.getContext('2d');
-        o.width = W; o.height = H;
-        var fs = W * 0.3; c.font = '800 ' + fs + 'px "Bricolage Grotesque", Arial, sans-serif';
-        fs *= Math.min(1, W * 0.84 / c.measureText(word).width);
-        c.font = '800 ' + fs + 'px "Bricolage Grotesque", Arial, sans-serif';
-        c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(word, W / 2, H / 2);
-        var img = c.getImageData(0, 0, W, H).data, step = Math.max(3, Math.round(W / 120)), pts = [];
-        for (var y = 0; y < H; y += step) for (var x = 0; x < W; x += step) if (img[(y * W + x) * 4 + 3] > 128) pts.push([x, y]);
-        this.sz = step * 0.62;
-        while (this.p.length > pts.length) this.p.splice(Math.floor(rnd(this.p.length)), 1);
-        for (var i = 0; i < pts.length; i++) {
-          if (!this.p[i]) this.p[i] = { x: fresh && reduced ? pts[i][0] : rnd(W), y: fresh && reduced ? pts[i][1] : rnd(H), vx: 0, vy: 0, c: i % 9 === 0 ? C.accent : i % 23 === 0 ? C.hot : C.ink };
-          this.p[i].tx = pts[i][0]; this.p[i].ty = pts[i][1];
-        }
-      },
-      frame: function () {
-        wash();
-        var R = W * 0.13, s = this.sz;
-        for (var i = 0; i < this.p.length; i++) {
-          var p = this.p[i];
-          p.vx += (p.tx - p.x) * 0.022; p.vy += (p.ty - p.y) * 0.022;
-          if (pointer) {
-            var dx = p.x - pointer.x, dy = p.y - pointer.y, d = Math.sqrt(dx * dx + dy * dy) + 1;
-            if (d < R) { var k = (1 - d / R) * 3.2 * D; p.vx += dx / d * k; p.vy += dy / d * k; }
-          }
-          p.vx *= 0.86; p.vy *= 0.86; p.x += p.vx; p.y += p.vy;
-          ctx.fillStyle = p.c; ctx.fillRect(p.x - s / 2, p.y - s / 2, s, s);
-        }
-        return true;
-      },
-      click: function () {
-        this.p.forEach(function (p) { p.vx += (Math.random() - 0.5) * 60 * D; p.vy += (Math.random() - 0.5) * 60 * D; });
-        this.wi = (this.wi + 1) % this.words.length; this.build(false);
-        if (reduced) this.p.forEach(function (p) { p.x = p.tx; p.y = p.ty; p.vx = p.vy = 0; });
-        figTitle.textContent = 'Fig. 6: ' + this.title();
-      }
-    },
-    { // 7. contour lines: a slow terrain that ripples when touched
+    { // 5. contour lines: a slow terrain that ripples when touched
       hint: 'Move to press into it. Click to send a ripple.', still: 1,
       init: function () { this.t = rnd(100); this.f = 0; this.rip = []; return 'contour lines, 28 layers'; },
       frame: function () {
@@ -847,18 +767,18 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
     b.addEventListener('click', function () {
       cur = i;
       figBtns.forEach(function (o, k) { o.setAttribute('aria-pressed', k === i ? 'true' : 'false'); });
-      try { localStorage.setItem('fig', String(i)); } catch (err) {}
+      try { localStorage.setItem('figure', b.dataset.fig); } catch (err) {}
       pointer = null; start();
     });
   });
   try {
-    var saved = parseInt(localStorage.getItem('fig'), 10);
-    if (saved >= 0 && saved < figs.length) { cur = saved; figBtns.forEach(function (o, k) { o.setAttribute('aria-pressed', k === cur ? 'true' : 'false'); }); }
+    var saved = localStorage.getItem('figure');
+    figBtns.forEach(function (o, k) { if (o.dataset.fig === saved) cur = k; });
+    figBtns.forEach(function (o, k) { o.setAttribute('aria-pressed', k === cur ? 'true' : 'false'); });
   } catch (err) {}
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(function (es) { heroVisible = es[0].isIntersecting; kick(); }).observe(canvas);
   }
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (cur === 5) start(); });
 
   /* ---------- Project thumbnails ---------- */
   function rr(c, x, y, w, h, rad) {
