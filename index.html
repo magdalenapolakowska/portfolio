@@ -830,12 +830,15 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
     pointer = { x: x, y: y, vx: pointer ? x - pointer.x : 0, vy: pointer ? y - pointer.y : 0 };
   }
   fieldBtn.addEventListener('pointermove', function (e) { track(e); kick(); });
-  fieldBtn.addEventListener('pointerdown', track);
+  var lastType = 'mouse';
+  fieldBtn.addEventListener('pointerdown', function (e) { lastType = e.pointerType || 'mouse'; track(e); });
   fieldBtn.addEventListener('pointerleave', function () { pointer = null; });
   fieldBtn.addEventListener('pointercancel', function () { pointer = null; });
   fieldBtn.addEventListener('click', function (e) {
-    var touch = e.pointerType === 'touch';
-    if (e.detail === 0) pointer = null; // keyboard: act on the centre
+    var touch = lastType !== 'mouse';
+    // A tap ends with the finger leaving, which clears the pointer before the click arrives,
+    // so take the position from the click itself. Keyboard clicks act on the centre.
+    if (e.detail === 0 && !e.clientX && !e.clientY) pointer = null; else { pointer = null; track(e); }
     figs[cur].click();
     if (reduced) settle(); else kick();
     if (touch) pointer = null;
