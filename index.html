@@ -324,9 +324,8 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
         <div class="filters figs" role="group" aria-label="Choose a drawing">
           <button type="button" id="fig-1" data-fig="flow" aria-pressed="true">1 Flow</button>
           <button type="button" id="fig-2" data-fig="nodes" aria-pressed="false">2 Nodes</button>
-          <button type="button" id="fig-3" data-fig="life" aria-pressed="false">3 Life</button>
-          <button type="button" id="fig-4" data-fig="ink" aria-pressed="false">4 Ink</button>
-          <button type="button" id="fig-5" data-fig="contours" aria-pressed="false">5 Contours</button>
+          <button type="button" id="fig-3" data-fig="ink" aria-pressed="false">3 Ink</button>
+          <button type="button" id="fig-4" data-fig="contours" aria-pressed="false">4 Contours</button>
         </div>
       </figure>
     </div>
@@ -521,7 +520,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
     };
   }
 
-  /* ---------- Hero figures: five drawings sharing one canvas ---------- */
+  /* ---------- Hero figures: four drawings sharing one canvas ---------- */
   var canvas = document.getElementById('fieldCanvas');
   var ctx = canvas.getContext('2d');
   var fieldBtn = document.getElementById('field');
@@ -611,49 +610,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
         });
       }
     },
-    { // 3. cellular automaton: Conway's Game of Life
-      hint: 'Draw on it. Click to drop a burst.', still: 1,
-      init: function () {
-        this.cs = Math.max(7 * D, Math.round(W / 46));
-        this.cols = Math.ceil(W / this.cs); this.rows = Math.ceil(H / this.cs);
-        this.g = new Uint8Array(this.cols * this.rows); this.f = 0;
-        for (var i = 0; i < this.g.length; i++) this.g[i] = Math.random() < 0.2 ? 1 : 0;
-        return 'game of life, ' + this.cols + ' by ' + this.rows + ' cells';
-      },
-      paint: function (x, y, rad, p) {
-        var cx = Math.floor(x / this.cs), cy = Math.floor(y / this.cs);
-        for (var j = -rad; j <= rad; j++) for (var i = -rad; i <= rad; i++) {
-          var X = cx + i, Y = cy + j;
-          if (X >= 0 && Y >= 0 && X < this.cols && Y < this.rows && Math.random() < p) this.g[Y * this.cols + X] = 3;
-        }
-      },
-      frame: function () {
-        var c = this.cols, r = this.rows, g = this.g, x, y, i;
-        if (pointer) this.paint(pointer.x, pointer.y, 1, 0.7);
-        if (++this.f % 7 === 0) {
-          var nx = new Uint8Array(g.length), pop = 0;
-          for (y = 0; y < r; y++) for (x = 0; x < c; x++) {
-            var k = 0;
-            for (var j = -1; j <= 1; j++) for (i = -1; i <= 1; i++) if (i || j) k += g[((y + j + r) % r) * c + (x + i + c) % c] ? 1 : 0;
-            var on = g[y * c + x] > 0, v = on ? (k === 2 || k === 3 ? 1 : 0) : (k === 3 ? 2 : 0);
-            nx[y * c + x] = v; if (v) pop++;
-          }
-          if (pop < g.length * 0.03) for (i = 0; i < nx.length; i++) if (Math.random() < 0.12) nx[i] = 2;
-          this.g = g = nx;
-        }
-        wash();
-        var s = this.cs, pad = Math.max(1, s * 0.12);
-        for (y = 0; y < r; y++) for (x = 0; x < c; x++) {
-          var st = g[y * c + x];
-          if (!st) continue;
-          ctx.fillStyle = st === 3 ? C.hot : st === 2 ? C.accent : C.ink;
-          ctx.fillRect(x * s + pad, y * s + pad, s - pad * 2, s - pad * 2);
-        }
-        return true;
-      },
-      click: function () { var s = spot(); this.paint(s.x, s.y, 4, 0.5); }
-    },
-    { // 4. ink in water: drops carried by a slow current
+    { // 3. ink in water: drops carried by a slow current
       hint: 'Drag to stir. Click to add a drop.', still: 90,
       init: function () {
         ctx.clearRect(0, 0, W, H); this.p = []; this.t = rnd(50); this.k = 0;
@@ -691,7 +648,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
       },
       click: function () { var s = spot(); this.drop(s.x, s.y); }
     },
-    { // 5. contour lines: a slow terrain that ripples when touched
+    { // 4. contour lines: a slow terrain that ripples when touched
       hint: 'Move to press into it. Click to send a ripple.', still: 1,
       init: function () { this.t = rnd(100); this.f = 0; this.rip = []; return 'contour lines, 28 layers'; },
       frame: function () {
