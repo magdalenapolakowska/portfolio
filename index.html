@@ -709,30 +709,44 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
 
   /* InTeam: companies on the left, students on the right, and the matches between them */
   function drawMatch(c, r, p, t) {
-    var n = 6, i, L = [], S = [];
+    var n = 6, i, k, L = [], S = [], apps = [];
     c.fillStyle = p.bg; c.fillRect(0, 0, 640, 480);
     for (i = 0; i < n; i++) { L.push({ x: 96, y: 62 + i * 71 }); S.push({ x: 544, y: 62 + i * 71 }); }
-    function link(a, b) {
-      c.beginPath(); c.moveTo(a.x, a.y);
-      c.bezierCurveTo(a.x + 210, a.y, b.x - 210, b.y, b.x, b.y); c.stroke();
+    function at(a, b, u) { // point on the curve from a to b
+      var v = 1 - u, x1 = a.x + 210, x2 = b.x - 210;
+      return {
+        x: v * v * v * a.x + 3 * v * v * u * x1 + 3 * v * u * u * x2 + u * u * u * b.x,
+        y: v * v * v * a.y + 3 * v * v * u * a.y + 3 * v * u * u * b.y + u * u * u * b.y
+      };
     }
-    // every application that was sent
-    c.strokeStyle = p.line; c.lineWidth = 1.5;
-    for (i = 0; i < n; i++) for (var k = 0; k < 3; k++) link(L[i], S[Math.floor(r() * n)]);
-    // the matches: a shuffled pairing, four of them made
+    function link(a, b, upTo) { // drawn as short segments so it can stop part-way
+      var steps = Math.max(1, Math.round(48 * upTo)), q;
+      c.beginPath(); c.moveTo(a.x, a.y);
+      for (var s = 1; s <= steps; s++) { q = at(a, b, upTo * s / steps); c.lineTo(q.x, q.y); }
+      c.stroke();
+    }
+    // every application that was sent, with one travelling along each
+    c.strokeStyle = p.line; c.lineWidth = 1.5; c.lineCap = 'round'; c.lineJoin = 'round';
+    for (i = 0; i < n; i++) for (k = 0; k < 3; k++) { var to = Math.floor(r() * n); apps.push([i, to]); link(L[i], S[to], 1); }
+    c.fillStyle = p.ink;
+    apps.forEach(function (a, idx) {
+      var u = (t * 0.28 + idx * 0.173) % 1, q = at(L[a[0]], S[a[1]], u);
+      c.globalAlpha = Math.sin(u * Math.PI); c.beginPath(); c.arc(q.x, q.y, 3.5, 0, Math.PI * 2); c.fill();
+    });
+    c.globalAlpha = 1;
+    // the matches: a shuffled pairing, drawn one after another, held, then cleared
     var order = [0, 1, 2, 3, 4, 5];
-    for (i = n - 1; i > 0; i--) { var j = Math.floor(r() * (i + 1)), t = order[i]; order[i] = order[j]; order[j] = t; }
-    // matches are drawn one after another, held, then cleared
-    var tt = t % 9, fade = tt > 8 ? 9 - tt : 1;
-    c.strokeStyle = p.accent; c.lineWidth = 4; c.lineCap = 'round';
+    for (i = n - 1; i > 0; i--) { var j = Math.floor(r() * (i + 1)), tmp = order[i]; order[i] = order[j]; order[j] = tmp; }
+    var tt = t % 7, fade = tt > 6.2 ? Math.max(0, (7 - tt) / 0.8) : 1;
     var onL = {}, onS = {};
+    c.strokeStyle = p.accent; c.lineWidth = 4;
     for (i = 0; i < 4; i++) {
-      var li = i === 3 ? 5 : i, prog = Math.max(0, Math.min(1, (tt - 0.4 - i * 1.3) / 1.1));
+      var li = i === 3 ? 5 : i, prog = Math.max(0, Math.min(1, (tt - 0.3 - i * 1.1) / 0.9));
       if (prog <= 0) continue;
-      c.globalAlpha = fade; c.setLineDash([prog * 720, 3000]); link(L[li], S[order[i]]);
+      c.globalAlpha = fade; link(L[li], S[order[i]], prog);
       onL[li] = fade; if (prog >= 1) onS[order[i]] = fade;
     }
-    c.setLineDash([]); c.globalAlpha = 1;
+    c.globalAlpha = 1;
     for (i = 0; i < n; i++) {
       // company
       c.fillStyle = p.paper; rr(c, L[i].x - 40, L[i].y - 20, 58, 40, 7); c.fill();
@@ -766,7 +780,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
     document.querySelectorAll('.card').forEach(function (card) { io.observe(card); });
   }
   function tick(now) { drawThumbs(now / 1000); requestAnimationFrame(tick); }
-  if (reduced) { if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { drawThumbs(7); }); }
+  if (reduced) { if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { drawThumbs(5.5); }); }
   else requestAnimationFrame(tick);
 
   /* ---------- Filters ---------- */
@@ -782,7 +796,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
   });
 
   /* ---------- Draw, and redraw on theme or size change ---------- */
-  function drawAll() { pal = null; drawThumbs(7); startField(); }
+  function drawAll() { pal = null; drawThumbs(5.5); startField(); }
   drawAll();
   new MutationObserver(drawAll).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', drawAll);
