@@ -146,7 +146,9 @@ figure { margin: 0; }
   background: var(--paper);
   cursor: crosshair;
 }
-.field canvas { display: block; width: 100%; aspect-ratio: 1 / 1; }
+.field canvas { display: block; width: 100%; aspect-ratio: 1 / 1; touch-action: pan-y; }
+.figs { margin-top: 12px; gap: 6px; }
+.figs button { padding: 7px 12px; }
 figcaption { margin-top: 10px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 
 /* Sections */
@@ -312,13 +314,22 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
         </div>
       </div>
       <figure>
-        <button class="field" id="field" type="button" aria-label="Draw a new flow field">
+        <button class="field" id="field" type="button" aria-label="Interactive drawing">
           <canvas id="fieldCanvas"></canvas>
         </button>
         <figcaption class="mono">
-          <span>Fig. 1: flow field, 520 particles, <span id="seedLabel">seed 000</span></span>
-          <span>Move to bend it. Click to redraw.</span>
+          <span id="figTitle">Fig. 1: flow field, 520 particles</span>
+          <span id="figHint">Move to bend it. Click to redraw.</span>
         </figcaption>
+        <div class="filters figs" role="group" aria-label="Choose a drawing">
+          <button type="button" id="fig-1" aria-pressed="true">1 Flow</button>
+          <button type="button" id="fig-2" aria-pressed="false">2 Tree</button>
+          <button type="button" id="fig-3" aria-pressed="false">3 Nodes</button>
+          <button type="button" id="fig-4" aria-pressed="false">4 Life</button>
+          <button type="button" id="fig-5" aria-pressed="false">5 Ink</button>
+          <button type="button" id="fig-6" aria-pressed="false">6 Type</button>
+          <button type="button" id="fig-7" aria-pressed="false">7 Contours</button>
+        </div>
       </figure>
     </div>
   </div>
@@ -512,65 +523,339 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
     };
   }
 
-  /* ---------- Hero flow field ---------- */
+  /* ---------- Hero figures: seven drawings sharing one canvas ---------- */
   var canvas = document.getElementById('fieldCanvas');
   var ctx = canvas.getContext('2d');
-  var seedLabel = document.getElementById('seedLabel');
-  var raf = 0, parts = [], frame = 0, W = 0, H = 0, seed = 0, pointer = null;
-  var FRAMES = 340, COUNT = 520;
-
-  function step() {
-    var dpr = W / canvas.clientWidth || 1;
-    ctx.lineWidth = 0.9 * dpr;
-    ctx.globalAlpha = 0.38;
-    for (var i = 0; i < parts.length; i++) {
-      var p = parts[i];
-      var u = p.x / W * 5, v = p.y / W * 5;
-      var a = (Math.sin(u * 1.3 + seed) + Math.cos(v * 1.7 - seed * 1.3) + Math.sin((u + v) * 0.8 + seed * 0.7)) * Math.PI * 0.85;
-      if (pointer) {
-        var dx = p.x - pointer.x, dy = p.y - pointer.y;
-        var d = Math.sqrt(dx * dx + dy * dy);
-        var pull = Math.exp(-d / (W * 0.16));
-        a = a * (1 - pull) + (Math.atan2(dy, dx) + Math.PI / 2) * pull;
-      }
-      var nx = p.x + Math.cos(a) * 2.2 * dpr, ny = p.y + Math.sin(a) * 2.2 * dpr;
-      ctx.strokeStyle = p.c;
-      ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(nx, ny); ctx.stroke();
-      p.x = nx; p.y = ny;
-      if (nx < 0 || ny < 0 || nx > W || ny > H) { p.x = Math.random() * W; p.y = Math.random() * H; }
-    }
-    ctx.globalAlpha = 1;
-  }
-  function loop() {
-    step();
-    if (++frame < FRAMES) raf = requestAnimationFrame(loop);
-  }
-  function startField() {
-    cancelAnimationFrame(raf);
-    var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = canvas.width = Math.max(1, Math.round(canvas.clientWidth * dpr));
-    H = canvas.height = Math.max(1, Math.round(canvas.clientHeight * dpr));
-    ctx.fillStyle = token('--paper');
-    ctx.fillRect(0, 0, W, H);
-    var n = Math.floor(Math.random() * 900) + 100;
-    seed = n / 37;
-    seedLabel.textContent = 'seed ' + n;
-    var cols = [token('--ink'), token('--ink'), token('--ink'), token('--accent'), token('--accent'), token('--hot')];
-    parts = [];
-    for (var i = 0; i < COUNT; i++) {
-      parts.push({ x: Math.random() * W, y: Math.random() * H, c: cols[i % cols.length] });
-    }
-    frame = 0;
-    if (reduced) { for (; frame < FRAMES; frame++) step(); }
-    else loop();
-  }
   var fieldBtn = document.getElementById('field');
-  fieldBtn.addEventListener('click', startField);
-  fieldBtn.addEventListener('pointermove', function (e) {
-    var r = canvas.getBoundingClientRect();
-    pointer = { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H };
-  });
+  var figTitle = document.getElementById('figTitle'), figHint = document.getElementById('figHint');
+  var figBtns = document.querySelectorAll('.figs button');
+  var raf = 0, W = 0, H = 0, D = 1, pointer = null, heroVisible = true, cur = 0, C = {};
+  function rnd(a) { return Math.random() * a; }
+  function wash(a) { ctx.globalAlpha = a == null ? 1 : a; ctx.fillStyle = C.paper; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
+  function spot() { return pointer ? { x: pointer.x, y: pointer.y } : { x: W / 2, y: H / 2 }; }
+
+  var figs = [
+    { // 1. flow field: draws itself once, then rests
+      hint: 'Move to bend it. Click to redraw.', still: 340,
+      init: function () {
+        wash();
+        var n = Math.floor(rnd(900)) + 100, cols = [C.ink, C.ink, C.ink, C.accent, C.accent, C.hot];
+        this.seed = n / 37; this.f = 0; this.p = [];
+        for (var i = 0; i < 520; i++) this.p.push({ x: rnd(W), y: rnd(H), c: cols[i % cols.length] });
+        return 'flow field, 520 particles, seed ' + n;
+      },
+      frame: function () {
+        var s = this.seed;
+        ctx.lineWidth = 0.9 * D; ctx.globalAlpha = 0.38;
+        for (var i = 0; i < this.p.length; i++) {
+          var p = this.p[i], u = p.x / W * 5, v = p.y / W * 5;
+          var a = (Math.sin(u * 1.3 + s) + Math.cos(v * 1.7 - s * 1.3) + Math.sin((u + v) * 0.8 + s * 0.7)) * Math.PI * 0.85;
+          if (pointer) {
+            var dx = p.x - pointer.x, dy = p.y - pointer.y, pull = Math.exp(-Math.sqrt(dx * dx + dy * dy) / (W * 0.16));
+            a = a * (1 - pull) + (Math.atan2(dy, dx) + Math.PI / 2) * pull;
+          }
+          var nx = p.x + Math.cos(a) * 2.2 * D, ny = p.y + Math.sin(a) * 2.2 * D;
+          ctx.strokeStyle = p.c; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(nx, ny); ctx.stroke();
+          p.x = nx; p.y = ny;
+          if (nx < 0 || ny < 0 || nx > W || ny > H) { p.x = rnd(W); p.y = rnd(H); }
+        }
+        ctx.globalAlpha = 1;
+        return ++this.f < 340;
+      },
+      click: function () { start(); }
+    },
+    { // 2. growing tree: every branch splits in two
+      hint: 'Click to plant another. Move to lean it.', still: 1200,
+      init: function () { wash(); this.tips = []; this.plant(W / 2, H); return 'growing tree, each branch splits in two'; },
+      plant: function (x, y) {
+        var len = Math.max(H * 0.08, Math.min(H * 0.24, y * 0.26)) * (0.85 + rnd(0.3));
+        this.tips.push({ x: x, y: y, a: -Math.PI / 2, len: len, left: len, w: 6.5 * D, d: 0 });
+      },
+      frame: function () {
+        ctx.lineCap = 'round';
+        for (var k = 0; k < 2; k++) {
+          var next = [];
+          for (var i = 0; i < this.tips.length; i++) {
+            var t = this.tips[i], sp = 1.7 * D;
+            t.a += (Math.random() - 0.5) * 0.09 + (pointer ? (pointer.x - t.x) / W * 0.012 : 0);
+            var nx = t.x + Math.cos(t.a) * sp, ny = t.y + Math.sin(t.a) * sp;
+            ctx.strokeStyle = t.d >= 6 ? C.accent : C.ink; ctx.lineWidth = Math.max(0.7 * D, t.w);
+            ctx.beginPath(); ctx.moveTo(t.x, t.y); ctx.lineTo(nx, ny); ctx.stroke();
+            t.x = nx; t.y = ny; t.left -= sp;
+            if (t.left > 0) { next.push(t); continue; }
+            if (t.d < 8) {
+              for (var s = -1; s <= 1; s += 2) {
+                var l = t.len * (0.66 + rnd(0.14));
+                next.push({ x: t.x, y: t.y, a: t.a + s * (0.22 + rnd(0.42)), len: l, left: l, w: t.w * 0.7, d: t.d + 1 });
+              }
+            } else {
+              ctx.fillStyle = Math.random() < 0.6 ? C.hot : C.accent;
+              ctx.beginPath(); ctx.arc(t.x, t.y, 2.4 * D, 0, Math.PI * 2); ctx.fill();
+            }
+          }
+          this.tips = next;
+        }
+        return this.tips.length > 0;
+      },
+      click: function () { var s = spot(); this.plant(s.x, s.y); }
+    },
+    { // 3. constellation: nodes link up when they come close
+      hint: 'Move to gather them. Click to scatter.', still: 1,
+      init: function () {
+        this.n = [];
+        for (var i = 0; i < 70; i++) { var a = rnd(6.283); this.n.push({ x: rnd(W), y: rnd(H), vx: Math.cos(a) * 0.35 * D, vy: Math.sin(a) * 0.35 * D }); }
+        return 'constellation, 70 nodes';
+      },
+      frame: function () {
+        var n = this.n, R = W * 0.17, i, j, a, b, dx, dy, d;
+        wash();
+        for (i = 0; i < n.length; i++) {
+          a = n[i];
+          if (pointer) {
+            dx = pointer.x - a.x; dy = pointer.y - a.y; d = Math.sqrt(dx * dx + dy * dy) + 1;
+            var pull = d < W * 0.1 ? -0.05 : d < W * 0.34 ? 0.018 : 0;
+            a.vx += dx / d * pull * D; a.vy += dy / d * pull * D;
+          }
+          var sp = Math.sqrt(a.vx * a.vx + a.vy * a.vy), keep = sp > 0.45 * D ? 0.96 : 1.004;
+          a.vx *= keep; a.vy *= keep; a.x += a.vx; a.y += a.vy;
+          if (a.x < 0 || a.x > W) { a.vx *= -1; a.x = Math.max(0, Math.min(W, a.x)); }
+          if (a.y < 0 || a.y > H) { a.vy *= -1; a.y = Math.max(0, Math.min(H, a.y)); }
+        }
+        ctx.lineWidth = D; ctx.strokeStyle = C.ink;
+        for (i = 0; i < n.length; i++) for (j = i + 1; j < n.length; j++) {
+          dx = n[i].x - n[j].x; dy = n[i].y - n[j].y; d = Math.sqrt(dx * dx + dy * dy);
+          if (d < R) { ctx.globalAlpha = (1 - d / R) * 0.75; ctx.beginPath(); ctx.moveTo(n[i].x, n[i].y); ctx.lineTo(n[j].x, n[j].y); ctx.stroke(); }
+        }
+        if (pointer) {
+          ctx.strokeStyle = C.accent; ctx.lineWidth = 1.4 * D;
+          for (i = 0; i < n.length; i++) {
+            dx = n[i].x - pointer.x; dy = n[i].y - pointer.y; d = Math.sqrt(dx * dx + dy * dy);
+            if (d < R * 1.3) { ctx.globalAlpha = 1 - d / (R * 1.3); ctx.beginPath(); ctx.moveTo(n[i].x, n[i].y); ctx.lineTo(pointer.x, pointer.y); ctx.stroke(); }
+          }
+        }
+        ctx.globalAlpha = 1;
+        for (i = 0; i < n.length; i++) {
+          ctx.fillStyle = i % 7 === 0 ? C.hot : C.ink;
+          ctx.beginPath(); ctx.arc(n[i].x, n[i].y, (i % 7 === 0 ? 3.4 : 2.3) * D, 0, Math.PI * 2); ctx.fill();
+        }
+        return true;
+      },
+      click: function () {
+        var s = spot();
+        this.n.forEach(function (a) {
+          var dx = a.x - s.x, dy = a.y - s.y, d = Math.sqrt(dx * dx + dy * dy) + 1, k = 7 * D * Math.exp(-d / (W * 0.3));
+          a.vx += dx / d * k; a.vy += dy / d * k;
+        });
+      }
+    },
+    { // 4. cellular automaton: Conway's Game of Life
+      hint: 'Draw on it. Click to drop a burst.', still: 1,
+      init: function () {
+        this.cs = Math.max(7 * D, Math.round(W / 46));
+        this.cols = Math.ceil(W / this.cs); this.rows = Math.ceil(H / this.cs);
+        this.g = new Uint8Array(this.cols * this.rows); this.f = 0;
+        for (var i = 0; i < this.g.length; i++) this.g[i] = Math.random() < 0.2 ? 1 : 0;
+        return 'game of life, ' + this.cols + ' by ' + this.rows + ' cells';
+      },
+      paint: function (x, y, rad, p) {
+        var cx = Math.floor(x / this.cs), cy = Math.floor(y / this.cs);
+        for (var j = -rad; j <= rad; j++) for (var i = -rad; i <= rad; i++) {
+          var X = cx + i, Y = cy + j;
+          if (X >= 0 && Y >= 0 && X < this.cols && Y < this.rows && Math.random() < p) this.g[Y * this.cols + X] = 3;
+        }
+      },
+      frame: function () {
+        var c = this.cols, r = this.rows, g = this.g, x, y, i;
+        if (pointer) this.paint(pointer.x, pointer.y, 1, 0.7);
+        if (++this.f % 7 === 0) {
+          var nx = new Uint8Array(g.length), pop = 0;
+          for (y = 0; y < r; y++) for (x = 0; x < c; x++) {
+            var k = 0;
+            for (var j = -1; j <= 1; j++) for (i = -1; i <= 1; i++) if (i || j) k += g[((y + j + r) % r) * c + (x + i + c) % c] ? 1 : 0;
+            var on = g[y * c + x] > 0, v = on ? (k === 2 || k === 3 ? 1 : 0) : (k === 3 ? 2 : 0);
+            nx[y * c + x] = v; if (v) pop++;
+          }
+          if (pop < g.length * 0.03) for (i = 0; i < nx.length; i++) if (Math.random() < 0.12) nx[i] = 2;
+          this.g = g = nx;
+        }
+        wash();
+        var s = this.cs, pad = Math.max(1, s * 0.12);
+        for (y = 0; y < r; y++) for (x = 0; x < c; x++) {
+          var st = g[y * c + x];
+          if (!st) continue;
+          ctx.fillStyle = st === 3 ? C.hot : st === 2 ? C.accent : C.ink;
+          ctx.fillRect(x * s + pad, y * s + pad, s - pad * 2, s - pad * 2);
+        }
+        return true;
+      },
+      click: function () { var s = spot(); this.paint(s.x, s.y, 4, 0.5); }
+    },
+    { // 5. ink in water: drops carried by a slow current
+      hint: 'Drag to stir. Click to add a drop.', still: 90,
+      init: function () {
+        ctx.clearRect(0, 0, W, H); this.p = []; this.t = rnd(50); this.k = 0;
+        this.drop(W * 0.3, H * 0.35); this.drop(W * 0.68, H * 0.45); this.drop(W * 0.45, H * 0.72);
+        return 'ink in water, three colours';
+      },
+      drop: function (x, y) {
+        var col = [C.accent, C.hot, C.ink][this.k++ % 3];
+        for (var i = 0; i < 240; i++) {
+          var a = rnd(6.283), q = rnd(1), rad = q * W * 0.05;
+          this.p.push({ x: x + Math.cos(a) * rad, y: y + Math.sin(a) * rad, vx: Math.cos(a) * q * 1.6 * D, vy: Math.sin(a) * q * 1.6 * D, c: col, s: (0.8 + rnd(2.4)) * D });
+        }
+        if (this.p.length > 1700) this.p.splice(0, this.p.length - 1700);
+      },
+      frame: function () {
+        ctx.globalCompositeOperation = 'destination-out'; ctx.globalAlpha = 0.09; ctx.fillRect(0, 0, W, H);
+        ctx.globalCompositeOperation = 'source-over'; this.t += 0.004;
+        var t = this.t, R = W * 0.15;
+        ctx.globalAlpha = 0.5;
+        for (var i = 0; i < this.p.length; i++) {
+          var p = this.p[i], u = p.x / W * 4, v = p.y / W * 4;
+          var a = (Math.sin(u + t * 3) + Math.cos(v - t * 2) + Math.sin((u - v) * 0.7 + t)) * Math.PI;
+          p.vx += Math.cos(a) * 0.022 * D; p.vy += Math.sin(a) * 0.022 * D;
+          if (pointer) {
+            var dx = p.x - pointer.x, dy = p.y - pointer.y, d = Math.sqrt(dx * dx + dy * dy);
+            if (d < R) { var w = (1 - d / R) * 0.09; p.vx += pointer.vx * w; p.vy += pointer.vy * w; }
+          }
+          p.vx *= 0.965; p.vy *= 0.965; p.x += p.vx; p.y += p.vy;
+          if (p.x < 0) p.x += W; else if (p.x > W) p.x -= W;
+          if (p.y < 0) p.y += H; else if (p.y > H) p.y -= H;
+          ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        return true;
+      },
+      click: function () { var s = spot(); this.drop(s.x, s.y); }
+    },
+    { // 6. particle type: a word that scatters and comes back
+      hint: 'Move to push it apart. Click for the next word.', still: 1,
+      words: ['code', 'coffee', 'fun'], wi: 0, p: [],
+      init: function () { this.wi = 0; this.p = []; this.build(true); return this.title(); },
+      title: function () { return 'particle type, the word "' + this.words[this.wi] + '"'; },
+      build: function (fresh) {
+        var word = this.words[this.wi], o = document.createElement('canvas'), c = o.getContext('2d');
+        o.width = W; o.height = H;
+        var fs = W * 0.3; c.font = '800 ' + fs + 'px "Bricolage Grotesque", Arial, sans-serif';
+        fs *= Math.min(1, W * 0.84 / c.measureText(word).width);
+        c.font = '800 ' + fs + 'px "Bricolage Grotesque", Arial, sans-serif';
+        c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(word, W / 2, H / 2);
+        var img = c.getImageData(0, 0, W, H).data, step = Math.max(3, Math.round(W / 120)), pts = [];
+        for (var y = 0; y < H; y += step) for (var x = 0; x < W; x += step) if (img[(y * W + x) * 4 + 3] > 128) pts.push([x, y]);
+        this.sz = step * 0.62;
+        while (this.p.length > pts.length) this.p.splice(Math.floor(rnd(this.p.length)), 1);
+        for (var i = 0; i < pts.length; i++) {
+          if (!this.p[i]) this.p[i] = { x: fresh && reduced ? pts[i][0] : rnd(W), y: fresh && reduced ? pts[i][1] : rnd(H), vx: 0, vy: 0, c: i % 9 === 0 ? C.accent : i % 23 === 0 ? C.hot : C.ink };
+          this.p[i].tx = pts[i][0]; this.p[i].ty = pts[i][1];
+        }
+      },
+      frame: function () {
+        wash();
+        var R = W * 0.13, s = this.sz;
+        for (var i = 0; i < this.p.length; i++) {
+          var p = this.p[i];
+          p.vx += (p.tx - p.x) * 0.022; p.vy += (p.ty - p.y) * 0.022;
+          if (pointer) {
+            var dx = p.x - pointer.x, dy = p.y - pointer.y, d = Math.sqrt(dx * dx + dy * dy) + 1;
+            if (d < R) { var k = (1 - d / R) * 3.2 * D; p.vx += dx / d * k; p.vy += dy / d * k; }
+          }
+          p.vx *= 0.86; p.vy *= 0.86; p.x += p.vx; p.y += p.vy;
+          ctx.fillStyle = p.c; ctx.fillRect(p.x - s / 2, p.y - s / 2, s, s);
+        }
+        return true;
+      },
+      click: function () {
+        this.p.forEach(function (p) { p.vx += (Math.random() - 0.5) * 60 * D; p.vy += (Math.random() - 0.5) * 60 * D; });
+        this.wi = (this.wi + 1) % this.words.length; this.build(false);
+        if (reduced) this.p.forEach(function (p) { p.x = p.tx; p.y = p.ty; p.vx = p.vy = 0; });
+        figTitle.textContent = 'Fig. 6: ' + this.title();
+      }
+    },
+    { // 7. contour lines: a slow terrain that ripples when touched
+      hint: 'Move to press into it. Click to send a ripple.', still: 1,
+      init: function () { this.t = rnd(100); this.f = 0; this.rip = []; return 'contour lines, 28 layers'; },
+      frame: function () {
+        wash(); this.t += 0.004; this.f++;
+        var t = this.t, N = 28, R = W * 0.22, f = this.f, rip = this.rip;
+        while (rip.length && f - rip[0].f > 320) rip.shift();
+        for (var i = 0; i < N; i++) {
+          var y0 = H * (i + 0.5) / N, v = y0 / H;
+          ctx.beginPath();
+          for (var x = 0; x <= W + 8 * D; x += 8 * D) {
+            var u = x / W;
+            var dy = (Math.sin(u * 5 + t * 2 + v * 6) * 0.5 + Math.sin(u * 11 - t * 3 + v * 3) * 0.25 + Math.sin((u + v) * 3 + t) * 0.5) * H * 0.03;
+            for (var k = 0; k < rip.length; k++) {
+              var age = (f - rip[k].f) / 60, ex = x - rip[k].x, ey = y0 - rip[k].y, q = (Math.sqrt(ex * ex + ey * ey) - age * W * 0.38) / (W * 0.055);
+              dy -= H * 0.04 * Math.exp(-age * 0.8) * Math.exp(-q * q);
+            }
+            if (pointer) {
+              var px = x - pointer.x, py = y0 - pointer.y, d = Math.sqrt(px * px + py * py);
+              if (d < R) dy += H * 0.045 * (1 - d / R) * (1 - d / R);
+            }
+            if (x === 0) ctx.moveTo(x, y0 + dy); else ctx.lineTo(x, y0 + dy);
+          }
+          ctx.strokeStyle = i % 5 === 2 ? C.accent : C.ink; ctx.lineWidth = (i % 5 === 2 ? 1.9 : 1.1) * D;
+          ctx.globalAlpha = i % 5 === 2 ? 1 : 0.7; ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+        return true;
+      },
+      click: function () { var s = spot(); this.rip.push({ x: s.x, y: s.y, f: this.f }); }
+    }
+  ];
+
+  function settle() { var f = figs[cur]; for (var k = 0; k < f.still; k++) if (f.frame() === false) break; }
+  function kick() { if (!raf && heroVisible && !reduced) raf = requestAnimationFrame(loop); }
+  function loop() {
+    raf = 0;
+    if (pointer) { pointer.vx *= 0.8; pointer.vy *= 0.8; }
+    if (figs[cur].frame() !== false) kick();
+  }
+  function start() {
+    cancelAnimationFrame(raf); raf = 0;
+    D = Math.min(window.devicePixelRatio || 1, 2);
+    W = canvas.width = Math.max(1, Math.round(canvas.clientWidth * D));
+    H = canvas.height = Math.max(1, Math.round(canvas.clientHeight * D));
+    C = { paper: token('--paper'), ink: token('--ink'), accent: token('--accent'), hot: token('--hot') };
+    ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1; ctx.lineCap = 'butt';
+    var f = figs[cur];
+    figTitle.textContent = 'Fig. ' + (cur + 1) + ': ' + f.init();
+    figHint.textContent = f.hint;
+    fieldBtn.setAttribute('aria-label', 'Interactive drawing. ' + f.hint);
+    if (reduced) settle(); else kick();
+  }
+  function startField() { start(); }
+  function track(e) {
+    var r = canvas.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * W, y = (e.clientY - r.top) / r.height * H;
+    pointer = { x: x, y: y, vx: pointer ? x - pointer.x : 0, vy: pointer ? y - pointer.y : 0 };
+  }
+  fieldBtn.addEventListener('pointermove', function (e) { track(e); kick(); });
+  fieldBtn.addEventListener('pointerdown', track);
   fieldBtn.addEventListener('pointerleave', function () { pointer = null; });
+  fieldBtn.addEventListener('pointercancel', function () { pointer = null; });
+  fieldBtn.addEventListener('click', function (e) {
+    var touch = e.pointerType === 'touch';
+    if (e.detail === 0) pointer = null; // keyboard: act on the centre
+    figs[cur].click();
+    if (reduced) settle(); else kick();
+    if (touch) pointer = null;
+  });
+  figBtns.forEach(function (b, i) {
+    b.addEventListener('click', function () {
+      cur = i;
+      figBtns.forEach(function (o, k) { o.setAttribute('aria-pressed', k === i ? 'true' : 'false'); });
+      try { localStorage.setItem('fig', String(i)); } catch (err) {}
+      pointer = null; start();
+    });
+  });
+  try {
+    var saved = parseInt(localStorage.getItem('fig'), 10);
+    if (saved >= 0 && saved < figs.length) { cur = saved; figBtns.forEach(function (o, k) { o.setAttribute('aria-pressed', k === cur ? 'true' : 'false'); }); }
+  } catch (err) {}
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (es) { heroVisible = es[0].isIntersecting; kick(); }).observe(canvas);
+  }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (cur === 5) start(); });
 
   /* ---------- Project thumbnails ---------- */
   function rr(c, x, y, w, h, rad) {
@@ -790,7 +1075,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
   else requestAnimationFrame(tick);
 
   /* ---------- Filters ---------- */
-  var buttons = document.querySelectorAll('.filters button');
+  var buttons = document.querySelectorAll('.filters:not(.figs) button');
   buttons.forEach(function (b) {
     b.addEventListener('click', function () {
       buttons.forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
