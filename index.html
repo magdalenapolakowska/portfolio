@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Your Name Portfolio</title>
+<title>Magdalena Polakowska Portfolio</title>
+<meta name="description" content="Portfolio of Magdalena Polakowska, a software engineer, UI and UX designer and artist based in Aarhus, Denmark.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=DM+Mono:wght@400;500&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
@@ -180,7 +181,12 @@ h2 {
 }
 .filters button:hover { border-color: var(--ink); }
 .filters button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
-.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px 28px; }
+.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 48px 32px; }
+.card.feature { grid-column: 1 / -1; display: grid; grid-template-columns: 1.2fr 1fr; gap: 32px; align-items: end; }
+.card.feature h3 { font-size: clamp(30px, 4vw, 44px); font-weight: 800; letter-spacing: -0.03em; margin: 6px 0 12px; }
+.card.feature p { font-size: 17px; color: var(--ink); max-width: 30em; }
+.card .tags { margin-top: 12px; font-size: 12.5px; color: var(--ink-soft); }
+.card.feature .tags { font-size: 12.5px; color: var(--ink-soft); }
 .card[hidden] { display: none; }
 .card canvas {
   display: block;
@@ -234,7 +240,8 @@ h2 {
 
 /* Contact */
 .contact h2 { font-size: clamp(40px, 7.4vw, 96px); letter-spacing: -0.045em; max-width: 12em; text-wrap: balance; }
-.mail { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 32px 0 40px; }
+.pitch { max-width: 32em; font-size: 19px; margin: 24px 0 0; }
+.mail { display: flex; align-items: center; gap: 14px 40px; flex-wrap: wrap; margin: 32px 0 40px; }
 .mail a {
   font-family: var(--display);
   font-weight: 600;
@@ -245,6 +252,8 @@ h2 {
   text-underline-offset: 6px;
   overflow-wrap: anywhere;
 }
+.mail a:hover { color: var(--accent); }
+.resume a:hover { color: var(--accent); }
 .links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .links div span { display: block; }
 .links div span + span { font-size: 16px; overflow-wrap: anywhere; }
@@ -254,6 +263,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
 
 @media (max-width: 860px) {
   .hero .wrap, .about { grid-template-columns: 1fr; gap: 36px; }
+  .card.feature { grid-template-columns: 1fr; gap: 0; }
   .field canvas { aspect-ratio: 4 / 3; }
   .grid { grid-template-columns: repeat(2, 1fr); }
   .row { grid-template-columns: 1fr; }
@@ -267,18 +277,14 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
 </head>
 <body>
 
-<div class="notice">
-  <div class="wrap mono"><b>Template</b><span>Sample content throughout. Swap in your name, projects, dates and links.</span></div>
-</div>
-
 <header class="nav">
   <div class="wrap">
-    <a class="name" href="#top">Your Name</a>
+    <a class="name" href="#top">Magdalena Polakowska</a>
     <nav aria-label="Sections">
       <ul>
         <li><a href="#work">Work</a></li>
         <li><a href="#about">About</a></li>
-        <li><a href="#experience">Experience</a></li>
+        <li><a href="#education">Education</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
     </nav>
@@ -289,9 +295,9 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
   <div class="hero">
     <div class="wrap">
       <div>
-        <span class="mono">Designer / Artist / Software engineer</span>
+        <span class="mono">Web developer / UI &amp; UX designer / Artist / Aarhus, Denmark</span>
         <h1>I draw things, then I <em>build</em> them.</h1>
-        <p class="lede">I'm Your Name. I work where design, art and code overlap: identities and interfaces, drawings on paper, and the software that ties them together.</p>
+        <p class="lede">I'm Magdalena Polakowska, a software engineer who is deeply connected to art and design. I bring technical skill and a creative eye to every project I take on.</p>
         <div class="cta">
           <a class="btn solid" href="#work">See the work</a>
           <a class="btn" href="#contact">Get in touch</a>
@@ -313,52 +319,40 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
     <div class="wrap">
       <div class="head">
         <div>
-          <span class="mono">Selected work, 2024 to 2026</span>
+          <span class="mono">Four projects</span>
           <h2>Work</h2>
-        </div>
-        <div class="filters" role="group" aria-label="Filter projects">
-          <button type="button" id="f-all" data-filter="all" aria-pressed="true">All</button>
-          <button type="button" id="f-design" data-filter="design" aria-pressed="false">Design</button>
-          <button type="button" id="f-art" data-filter="art" aria-pressed="false">Art</button>
-          <button type="button" id="f-software" data-filter="software" aria-pressed="false">Software</button>
         </div>
       </div>
       <div class="grid" id="grid">
-        <article class="card" data-kind="design">
+        <article class="card feature" data-kind="design">
           <canvas width="640" height="480" data-seed="11" aria-hidden="true"></canvas>
-          <div class="meta mono"><span>Design</span><span>2026</span></div>
-          <h3>Tidewater</h3>
-          <p>Identity, packaging and a small web shop for a ceramics studio.</p>
+          <div>
+            <div class="meta mono"><span>Bachelor project</span><span>2022 to 2023</span></div>
+            <h3>Design System</h3>
+            <p>A design system template that a company can reuse and scale as it grows. It gives designers and developers a single source of truth, and supports good communication and knowledge sharing between teams from the start.</p>
+            <p class="tags mono">Web app / Design systems / Design</p>
+          </div>
         </article>
         <article class="card" data-kind="art">
           <canvas width="640" height="480" data-seed="27" aria-hidden="true"></canvas>
-          <div class="meta mono"><span>Art</span><span>2025</span></div>
-          <h3>Field Notes</h3>
-          <p>Twelve ink and gouache studies made on walks along the same path.</p>
+          <div class="meta mono"><span>Personal project</span><span>Mobile app</span></div>
+          <h3>RawShare</h3>
+          <p>A mobile app for sharing food with people in your nearest area.</p>
+          <p class="tags mono">Mobile app / Design</p>
         </article>
         <article class="card" data-kind="software">
           <canvas width="640" height="480" data-seed="30" aria-hidden="true"></canvas>
-          <div class="meta mono"><span>Software</span><span>2025</span></div>
-          <h3>Loom</h3>
-          <p>An open-source layout engine for generative posters, written in TypeScript.</p>
-        </article>
-        <article class="card" data-kind="design">
-          <canvas width="640" height="480" data-seed="46" aria-hidden="true"></canvas>
-          <div class="meta mono"><span>Design</span><span>2024</span></div>
-          <h3>Parcel</h3>
-          <p>App redesign for a neighbourhood delivery co-op, from research to shipped UI.</p>
+          <div class="meta mono"><span>School project</span><span>Web app</span></div>
+          <h3>InTeam</h3>
+          <p>A web app that helps companies and students find each other for internships.</p>
+          <p class="tags mono">Web app / Design / Database</p>
         </article>
         <article class="card" data-kind="art">
           <canvas width="640" height="480" data-seed="58" aria-hidden="true"></canvas>
-          <div class="meta mono"><span>Art</span><span>2024</span></div>
-          <h3>Slow Signals</h3>
-          <p>Pen plotter drawings driven by a year of local weather data.</p>
-        </article>
-        <article class="card" data-kind="software">
-          <canvas width="640" height="480" data-seed="90" aria-hidden="true"></canvas>
-          <div class="meta mono"><span>Software</span><span>2024</span></div>
-          <h3>Palette CLI</h3>
-          <p>A command-line tool that pulls colour palettes out of photographs.</p>
+          <div class="meta mono"><span>Personal project</span><span>Web app</span></div>
+          <h3>Polanka</h3>
+          <p>A web app for a family-owned flower store.</p>
+          <p class="tags mono">Web app / Design</p>
         </article>
       </div>
     </div>
@@ -373,22 +367,22 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
         </div>
       </div>
       <div class="about">
-        <p class="big">I started out drawing, learned to design so the drawings had somewhere to live, and learned to program so I could make the tools I kept wishing for.</p>
+        <p class="big">I'm a software engineer with a Bachelor's degree in Web Development and a background in UI and UX design, multimedia design and graphic design.</p>
         <div class="side">
-          <p>Today I take projects from first sketch to working product. Some weeks that means a brand system, some weeks a codebase, and most weeks a bit of both.</p>
-          <p>Away from the screen I keep a sketchbook, print on an old pen plotter, and collect more paper than I can use.</p>
+          <p>Being at home in both design and development lets me join function with aesthetics, and deliver solutions that people enjoy using.</p>
+          <p>Usability and human-centred design come first. By empathising with users and involving them throughout the design process, I can build a product that meets their specific needs.</p>
           <div class="skills">
             <div>
+              <span class="mono">Development</span>
+              <ul><li>Web development</li><li>Design systems</li><li>Component libraries</li></ul>
+            </div>
+            <div>
               <span class="mono">Design</span>
-              <ul><li>Brand identity</li><li>Interface design</li><li>Typography</li></ul>
+              <ul><li>UI and UX design</li><li>Multimedia design</li><li>Graphic design</li></ul>
             </div>
             <div>
-              <span class="mono">Art</span>
-              <ul><li>Illustration</li><li>Ink and gouache</li><li>Generative work</li></ul>
-            </div>
-            <div>
-              <span class="mono">Software</span>
-              <ul><li>TypeScript</li><li>Python</li><li>Creative coding</li></ul>
+              <span class="mono">Approach</span>
+              <ul><li>Usability</li><li>Human-centred design</li><li>Designing with users</li></ul>
             </div>
           </div>
         </div>
@@ -396,52 +390,37 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
     </div>
   </section>
 
-  <section id="experience">
+  <section id="education">
     <div class="wrap">
       <div class="head">
         <div>
           <span class="mono">Resume</span>
-          <h2>Experience</h2>
+          <h2>Education</h2>
         </div>
       </div>
       <div class="rows">
         <div class="row">
-          <span class="mono years">2024 to now</span>
-          <div><h3>Independent designer and developer</h3><span class="org">Self-employed</span></div>
-          <p>Identity, product and creative coding projects for studios, startups and cultural clients.</p>
-        </div>
-        <div class="row">
-          <span class="mono years">2021 to 2024</span>
-          <div><h3>Product designer</h3><span class="org">Studio Name</span></div>
-          <p>Led design on three shipped products and built the shared component library.</p>
-        </div>
-        <div class="row">
-          <span class="mono years">2019 to 2021</span>
-          <div><h3>Front-end engineer</h3><span class="org">Company Name</span></div>
-          <p>Built interfaces and internal design tooling alongside a team of eight.</p>
-        </div>
-        <div class="row">
-          <span class="mono years">2015 to 2019</span>
-          <div><h3>BA, Your Degree</h3><span class="org">School Name</span></div>
-          <p>Graduated with a final project combining print, drawing and code.</p>
+          <span class="mono years">2022 to 2023</span>
+          <div><h3>Bachelor's degree in Web Development</h3><span class="org">Business Academy Aarhus</span></div>
+          <p>Bachelor project on design systems and component libraries.</p>
         </div>
       </div>
-      <p class="resume mono">Full resume available on request.</p>
+      <p class="resume mono"><a href="https://www.linkedin.com/in/magdalenapolakowska/">Full history on LinkedIn</a></p>
     </div>
   </section>
 
   <section id="contact" class="contact">
     <div class="wrap">
-      <span class="mono">Open for projects and collaborations</span>
-      <h2>Have something in mind? Write to me.</h2>
+      <span class="mono">Aarhus, Denmark</span>
+      <h2>Let's connect.</h2>
+      <p class="pitch">A question, a project idea, or just a hello: I'd love to hear from you. Let's create something together.</p>
       <div class="mail">
-        <a id="email" href="mailto:hello@yourname.com">hello@yourname.com</a>
-        <button class="btn" type="button" id="copy">Copy address</button>
+        <a href="https://www.linkedin.com/in/magdalenapolakowska/">LinkedIn</a>
+        <a href="https://www.instagram.com/madeele_design/">Instagram</a>
       </div>
       <div class="links">
-        <div><span class="mono">Code</span><span>github.com/yourname</span></div>
-        <div><span class="mono">Art</span><span>instagram.com/yourname</span></div>
-        <div><span class="mono">Work history</span><span>linkedin.com/in/yourname</span></div>
+        <div><span class="mono">Work</span><span>linkedin.com/in/magdalenapolakowska</span></div>
+        <div><span class="mono">Art and design</span><span>instagram.com/madeele_design</span></div>
       </div>
     </div>
   </section>
@@ -449,7 +428,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
 
 <footer>
   <div class="wrap mono">
-    <span>© 2026 Your Name</span>
+    <span>© 2026 Magdalena Polakowska</span>
     <span>Every image on this page is drawn by code</span>
   </div>
 </footer>
@@ -610,16 +589,6 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
         card.hidden = f !== 'all' && card.dataset.kind !== f;
       });
     });
-  });
-
-  /* ---------- Copy email ---------- */
-  var copy = document.getElementById('copy');
-  copy.addEventListener('click', function () {
-    var addr = document.getElementById('email').textContent;
-    var done = function (t) { copy.textContent = t; setTimeout(function () { copy.textContent = 'Copy address'; }, 1800); };
-    try {
-      navigator.clipboard.writeText(addr).then(function () { done('Copied'); }, function () { done('Select the address to copy'); });
-    } catch (e) { done('Select the address to copy'); }
   });
 
   /* ---------- Draw, and redraw on theme or size change ---------- */
