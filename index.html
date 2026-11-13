@@ -326,7 +326,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
         </div>
       </div>
       <div class="grid" id="grid">
-        <article class="card feature" data-kind="design">
+        <article class="card feature" data-kind="system">
           <canvas width="640" height="480" data-seed="11" aria-hidden="true"></canvas>
           <div>
             <div class="meta mono"><span>Bachelor project</span><span>2022 to 2023</span></div>
@@ -335,14 +335,14 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
             <p class="tags mono">Web app / Design systems / Design</p>
           </div>
         </article>
-        <article class="card" data-kind="art">
+        <article class="card" data-kind="share">
           <canvas width="640" height="480" data-seed="27" aria-hidden="true"></canvas>
           <div class="meta mono"><span>Personal project</span><span>Mobile app</span></div>
           <h3>RawShare</h3>
           <p>Cooked too much again? RawShare is a mobile app for passing good food on to the people living nearest to you.</p>
           <p class="tags mono">Mobile app / Design</p>
         </article>
-        <article class="card" data-kind="software">
+        <article class="card" data-kind="match">
           <canvas width="640" height="480" data-seed="30" aria-hidden="true"></canvas>
           <div class="meta mono"><span>School project</span><span>Web app</span></div>
           <h3>InTeam</h3>
@@ -567,75 +567,169 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
   fieldBtn.addEventListener('pointerleave', function () { pointer = null; });
 
   /* ---------- Project thumbnails ---------- */
-  function drawDesign(c, r, pal) {
-    var s = 160;
-    for (var y = 0; y < 3; y++) for (var x = 0; x < 4; x++) {
-      var bg = pal[Math.floor(r() * pal.length)], fg = pal[Math.floor(r() * pal.length)];
-      if (fg === bg) fg = pal[(pal.indexOf(bg) + 1) % pal.length];
-      c.fillStyle = bg; c.fillRect(x * s, y * s, s, s);
-      c.fillStyle = fg;
-      var k = r();
-      c.beginPath();
-      if (k < 0.55) {
-        var cx = x * s + (r() < 0.5 ? 0 : s), cy = y * s + (r() < 0.5 ? 0 : s);
-        c.save(); c.rect(x * s, y * s, s, s); c.clip();
-        c.beginPath(); c.arc(cx, cy, s, 0, Math.PI * 2); c.fill(); c.restore();
-      } else if (k < 0.8) {
-        c.arc(x * s + s / 2, y * s + s / 2, s * 0.32, 0, Math.PI * 2); c.fill();
-      } else {
-        c.fillRect(x * s, y * s + s / 2, s, s / 2);
-      }
-    }
+  function rr(c, x, y, w, h, rad) {
+    c.beginPath();
+    c.moveTo(x + rad, y);
+    c.arcTo(x + w, y, x + w, y + h, rad);
+    c.arcTo(x + w, y + h, x, y + h, rad);
+    c.arcTo(x, y + h, x, y, rad);
+    c.arcTo(x, y, x + w, y, rad);
+    c.closePath();
   }
-  function drawArt(c, r, pal) {
-    c.fillStyle = pal[0]; c.fillRect(0, 0, 640, 480);
-    c.lineCap = 'round';
-    for (var i = 0; i < 46; i++) {
-      var y0 = r() * 480, amp = 10 + r() * 46, f = 0.004 + r() * 0.012, ph = r() * 6.28;
-      c.strokeStyle = pal[1 + Math.floor(r() * 3)];
-      c.globalAlpha = 0.25 + r() * 0.6;
-      c.lineWidth = 1 + r() * r() * 22;
-      c.beginPath();
-      for (var x = -20; x <= 660; x += 8) {
-        var y = y0 + Math.sin(x * f + ph) * amp + Math.sin(x * f * 2.7 + ph * 2) * amp * 0.3;
-        if (x === -20) c.moveTo(x, y); else c.lineTo(x, y);
-      }
-      c.stroke();
-    }
+  function bar(c, x, y, w, col) { c.fillStyle = col; rr(c, x, y, w, 6, 3); c.fill(); }
+
+  /* Design System Template: a sheet of tokens and components */
+  function drawSystem(c, r, p) {
+    var i;
+    c.fillStyle = p.bg; c.fillRect(0, 0, 640, 480);
+    c.strokeStyle = p.line; c.lineWidth = 1; c.globalAlpha = 0.6;
+    for (i = 40; i < 640; i += 40) { c.beginPath(); c.moveTo(i, 0); c.lineTo(i, 480); c.stroke(); }
+    for (i = 40; i < 480; i += 40) { c.beginPath(); c.moveTo(0, i); c.lineTo(640, i); c.stroke(); }
     c.globalAlpha = 1;
-  }
-  function drawSoftware(c, r, pal, seedN) {
-    var rules = [30, 90, 110, 150], rule = rules[seedN % rules.length];
-    var cols = 64, rows = 48, cell = 10, row = [], i;
-    c.fillStyle = pal[0]; c.fillRect(0, 0, 640, 480);
-    for (i = 0; i < cols; i++) row.push(rule === 110 ? (r() < 0.5 ? 1 : 0) : 0);
-    if (rule !== 110) row[cols >> 1] = 1;
-    for (var y = 0; y < rows; y++) {
-      for (var x = 0; x < cols; x++) {
-        if (row[x]) {
-          c.fillStyle = r() < 0.12 ? pal[3] : (r() < 0.2 ? pal[2] : pal[1]);
-          c.fillRect(x * cell + 1, y * cell + 1, cell - 2, cell - 2);
-        }
-      }
-      var next = [];
-      for (x = 0; x < cols; x++) {
-        var idx = (row[(x + cols - 1) % cols] << 2) | (row[x] << 1) | row[(x + 1) % cols];
-        next.push((rule >> idx) & 1);
-      }
-      row = next;
+    // colour tokens
+    var sw = [p.ink, p.accent, p.hot, p.paper, p.line];
+    for (i = 0; i < sw.length; i++) {
+      c.fillStyle = sw[i]; rr(c, 40 + i * 60, 40, 48, 48, 8); c.fill();
+      c.strokeStyle = p.ink; c.lineWidth = 1; rr(c, 40 + i * 60, 40, 48, 48, 8); c.stroke();
+    }
+    // type specimen and scale
+    c.fillStyle = p.ink;
+    c.font = '800 76px "Bricolage Grotesque", Arial, sans-serif';
+    c.textBaseline = 'alphabetic';
+    c.fillText('Aa', 384, 96);
+    [14, 10, 7, 5].forEach(function (h, k) { c.fillRect(508, 40 + k * 16, 92 - k * 16, h); });
+    // buttons
+    c.fillStyle = p.ink; rr(c, 40, 124, 132, 46, 23); c.fill(); bar(c, 76, 144, 60, p.paper);
+    c.strokeStyle = p.ink; c.lineWidth = 2; rr(c, 188, 124, 132, 46, 23); c.stroke(); bar(c, 224, 144, 60, p.ink);
+    c.fillStyle = p.accent; rr(c, 336, 124, 132, 46, 23); c.fill(); bar(c, 372, 144, 60, p.paper);
+    c.fillStyle = p.hot; c.beginPath(); c.arc(507, 147, 23, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = p.paper; c.lineWidth = 3;
+    c.beginPath(); c.moveTo(497, 147); c.lineTo(517, 147); c.moveTo(507, 137); c.lineTo(507, 157); c.stroke();
+    // input and select
+    c.fillStyle = p.paper; rr(c, 40, 200, 280, 50, 8); c.fill();
+    c.strokeStyle = p.accent; c.lineWidth = 2; rr(c, 40, 200, 280, 50, 8); c.stroke();
+    bar(c, 58, 222, 90, p.ink); c.fillStyle = p.accent; c.fillRect(154, 213, 2, 24);
+    c.fillStyle = p.paper; rr(c, 336, 200, 264, 50, 8); c.fill();
+    c.strokeStyle = p.ink; c.lineWidth = 1.5; rr(c, 336, 200, 264, 50, 8); c.stroke();
+    bar(c, 354, 222, 120, p.line);
+    c.strokeStyle = p.ink; c.lineWidth = 2; c.beginPath(); c.moveTo(566, 221); c.lineTo(574, 229); c.lineTo(582, 221); c.stroke();
+    // toggles, checkbox, radio, slider
+    c.fillStyle = p.accent; rr(c, 40, 284, 64, 34, 17); c.fill();
+    c.fillStyle = p.paper; c.beginPath(); c.arc(87, 301, 12, 0, Math.PI * 2); c.fill();
+    c.fillStyle = p.line; rr(c, 120, 284, 64, 34, 17); c.fill();
+    c.fillStyle = p.paper; c.beginPath(); c.arc(137, 301, 12, 0, Math.PI * 2); c.fill();
+    c.fillStyle = p.ink; rr(c, 204, 284, 34, 34, 7); c.fill();
+    c.strokeStyle = p.paper; c.lineWidth = 3; c.beginPath(); c.moveTo(212, 301); c.lineTo(219, 308); c.lineTo(230, 294); c.stroke();
+    c.strokeStyle = p.ink; c.lineWidth = 2; c.beginPath(); c.arc(271, 301, 16, 0, Math.PI * 2); c.stroke();
+    c.fillStyle = p.ink; c.beginPath(); c.arc(271, 301, 8, 0, Math.PI * 2); c.fill();
+    var knob = 336 + (0.35 + r() * 0.4) * 264;
+    c.fillStyle = p.line; rr(c, 336, 298, 264, 6, 3); c.fill();
+    c.fillStyle = p.accent; rr(c, 336, 298, knob - 336, 6, 3); c.fill();
+    c.fillStyle = p.paper; c.beginPath(); c.arc(knob, 301, 12, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = p.accent; c.lineWidth = 3; c.beginPath(); c.arc(knob, 301, 12, 0, Math.PI * 2); c.stroke();
+    // cards
+    var fills = [p.hot, p.accent, p.ink];
+    for (i = 0; i < 3; i++) {
+      var x = 40 + i * 192;
+      c.fillStyle = p.paper; rr(c, x, 352, 176, 96, 10); c.fill();
+      c.strokeStyle = p.line; c.lineWidth = 1.5; rr(c, x, 352, 176, 96, 10); c.stroke();
+      c.fillStyle = fills[i]; rr(c, x + 14, 366, 56, 68, 6); c.fill();
+      bar(c, x + 84, 374, 74, p.ink); bar(c, x + 84, 392, 56, p.line); bar(c, x + 84, 410, 66, p.line);
     }
   }
+
+  /* RawShare: plates of food shared with the homes nearest to you */
+  function drawShare(c, r, p) {
+    var i, k;
+    c.fillStyle = p.bg; c.fillRect(0, 0, 640, 480);
+    // streets
+    c.strokeStyle = p.paper; c.lineCap = 'round';
+    for (i = 0; i < 5; i++) {
+      c.lineWidth = 10 + r() * 8;
+      var y0 = 40 + i * 100 + r() * 40, tilt = (r() - 0.5) * 120;
+      c.beginPath(); c.moveTo(-20, y0); c.lineTo(660, y0 + tilt); c.stroke();
+    }
+    for (i = 0; i < 6; i++) {
+      c.lineWidth = 10 + r() * 8;
+      var x0 = 30 + i * 115 + r() * 40, lean = (r() - 0.5) * 120;
+      c.beginPath(); c.moveTo(x0, -20); c.lineTo(x0 + lean, 500); c.stroke();
+    }
+    // homes, kept apart from each other
+    var me = { x: 300 + r() * 40, y: 225 + r() * 30 }, homes = [], tries = 0;
+    while (homes.length < 16 && tries++ < 600) {
+      var h = { x: 40 + r() * 560, y: 40 + r() * 400 }, ok = Math.hypot(h.x - me.x, h.y - me.y) > 70;
+      for (k = 0; k < homes.length && ok; k++) ok = Math.hypot(h.x - homes[k].x, h.y - homes[k].y) > 74;
+      if (ok) homes.push(h);
+    }
+    var R = 175;
+    // the nearest area
+    c.fillStyle = p.accent; c.globalAlpha = 0.08; c.beginPath(); c.arc(me.x, me.y, R, 0, Math.PI * 2); c.fill();
+    c.globalAlpha = 1; c.strokeStyle = p.accent; c.lineWidth = 2; c.setLineDash([3, 9]);
+    c.beginPath(); c.arc(me.x, me.y, R, 0, Math.PI * 2); c.stroke();
+    c.beginPath(); c.arc(me.x, me.y, R * 0.55, 0, Math.PI * 2); c.stroke();
+    // links to neighbours in range
+    c.strokeStyle = p.ink; c.lineWidth = 2; c.setLineDash([2, 7]);
+    homes.forEach(function (h) {
+      h.near = Math.hypot(h.x - me.x, h.y - me.y) < R - 14;
+      if (h.near) { c.beginPath(); c.moveTo(me.x, me.y); c.lineTo(h.x, h.y); c.stroke(); }
+    });
+    c.setLineDash([]);
+    homes.forEach(function (h) {
+      if (h.near) { // a plate
+        c.fillStyle = p.paper; c.beginPath(); c.arc(h.x, h.y, 19, 0, Math.PI * 2); c.fill();
+        c.strokeStyle = p.ink; c.lineWidth = 2; c.beginPath(); c.arc(h.x, h.y, 19, 0, Math.PI * 2); c.stroke();
+        c.fillStyle = p.hot; c.beginPath(); c.arc(h.x, h.y, 10, 0, Math.PI * 2); c.fill();
+      } else { // a home out of range
+        c.fillStyle = p.line; c.beginPath(); c.arc(h.x, h.y, 8, 0, Math.PI * 2); c.fill();
+      }
+    });
+    // you
+    c.fillStyle = p.accent; c.beginPath(); c.arc(me.x, me.y, 24, 0, Math.PI * 2); c.fill();
+    c.fillStyle = p.paper; c.beginPath(); c.arc(me.x, me.y, 9, 0, Math.PI * 2); c.fill();
+  }
+
+  /* InTeam: companies on the left, students on the right, and the matches between them */
+  function drawMatch(c, r, p) {
+    var n = 6, i, L = [], S = [];
+    c.fillStyle = p.bg; c.fillRect(0, 0, 640, 480);
+    for (i = 0; i < n; i++) { L.push({ x: 96, y: 62 + i * 71 }); S.push({ x: 544, y: 62 + i * 71 }); }
+    function link(a, b) {
+      c.beginPath(); c.moveTo(a.x, a.y);
+      c.bezierCurveTo(a.x + 210, a.y, b.x - 210, b.y, b.x, b.y); c.stroke();
+    }
+    // every application that was sent
+    c.strokeStyle = p.line; c.lineWidth = 1.5;
+    for (i = 0; i < n; i++) for (var k = 0; k < 3; k++) link(L[i], S[Math.floor(r() * n)]);
+    // the matches: a shuffled pairing, four of them made
+    var order = [0, 1, 2, 3, 4, 5];
+    for (i = n - 1; i > 0; i--) { var j = Math.floor(r() * (i + 1)), t = order[i]; order[i] = order[j]; order[j] = t; }
+    c.strokeStyle = p.accent; c.lineWidth = 4; c.lineCap = 'round';
+    var matchedL = {}, matchedS = {};
+    for (i = 0; i < 4; i++) { link(L[i === 3 ? 5 : i], S[order[i]]); matchedL[i === 3 ? 5 : i] = 1; matchedS[order[i]] = 1; }
+    for (i = 0; i < n; i++) {
+      // company
+      c.fillStyle = matchedL[i] ? p.ink : p.paper; rr(c, L[i].x - 40, L[i].y - 20, 58, 40, 7); c.fill();
+      c.strokeStyle = p.ink; c.lineWidth = 2; rr(c, L[i].x - 40, L[i].y - 20, 58, 40, 7); c.stroke();
+      bar(c, L[i].x - 30, L[i].y - 3, 38, matchedL[i] ? p.paper : p.line);
+      // student
+      c.fillStyle = matchedS[i] ? p.hot : p.paper; c.beginPath(); c.arc(S[i].x + 12, S[i].y, 20, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = p.ink; c.lineWidth = 2; c.beginPath(); c.arc(S[i].x + 12, S[i].y, 20, 0, Math.PI * 2); c.stroke();
+    }
+  }
+
   function drawThumbs() {
-    var pal = [token('--paper-2'), token('--ink'), token('--accent'), token('--hot')];
+    var p = { bg: token('--paper-2'), paper: token('--paper'), ink: token('--ink'), accent: token('--accent'), hot: token('--hot'), line: token('--line') };
     document.querySelectorAll('.card').forEach(function (card) {
       var cv = card.querySelector('canvas'), c = cv.getContext('2d');
-      var s = parseInt(cv.dataset.seed, 10), r = rng(s);
+      var r = rng(parseInt(cv.dataset.seed, 10));
+      c.setTransform(1, 0, 0, 1, 0, 0); c.setLineDash([]); c.globalAlpha = 1; c.lineCap = 'butt';
       c.clearRect(0, 0, 640, 480);
-      if (card.dataset.kind === 'design') drawDesign(c, r, pal);
-      else if (card.dataset.kind === 'art') drawArt(c, r, pal);
-      else drawSoftware(c, r, pal, s);
+      if (card.dataset.kind === 'system') drawSystem(c, r, p);
+      else if (card.dataset.kind === 'share') drawShare(c, r, p);
+      else drawMatch(c, r, p);
     });
   }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawThumbs);
 
   /* ---------- Filters ---------- */
   var buttons = document.querySelectorAll('.filters button');
