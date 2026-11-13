@@ -325,7 +325,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
           <button type="button" id="fig-1" data-fig="flow" aria-pressed="true">1 Flow</button>
           <button type="button" id="fig-2" data-fig="nodes" aria-pressed="false">2 Nodes</button>
           <button type="button" id="fig-3" data-fig="ink" aria-pressed="false">3 Ink</button>
-          <button type="button" id="fig-4" data-fig="contours" aria-pressed="false">4 Contours</button>
+          <button type="button" id="fig-4" data-fig="wave" aria-pressed="false">4 Wave</button>
         </div>
       </figure>
     </div>
@@ -648,9 +648,9 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
       },
       click: function () { var s = spot(); this.drop(s.x, s.y); }
     },
-    { // 4. contour lines: a slow terrain that ripples when touched
+    { // 4. wave: slow rolling lines that ripple when touched
       hint: 'Move to press into it. Click to send a ripple.', still: 1,
-      init: function () { this.t = rnd(100); this.f = 0; this.rip = []; return 'contour lines, 28 layers'; },
+      init: function () { this.t = rnd(100); this.f = 0; this.rip = []; return 'wave, 28 lines'; },
       frame: function () {
         wash(); this.t += 0.004; this.f++;
         var t = this.t, N = 28, R = W * 0.22, f = this.f, rip = this.rip;
