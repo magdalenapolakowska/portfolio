@@ -3,6 +3,7 @@
 
 import { root } from './util.js';
 import './theme.js';
+import './cat.js';
 import { canvas, start as restartHero } from './hero.js';
 import { refresh as refreshProjects } from './projects.js';
 

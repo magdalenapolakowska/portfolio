@@ -145,7 +145,7 @@ h2 {
 .links div span { display: block; }
 .links div span + span { font-size: 16px; overflow-wrap: anywhere; }
 
-footer { border-top: 1px solid var(--line); padding: 22px 0 40px; }
+footer { border-top: 1px solid var(--line); padding: 22px 0 72px; }
 footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 
 @media (max-width: 860px) {

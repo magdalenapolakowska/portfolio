@@ -85,3 +85,16 @@
 .stack > div { display: grid; gap: 10px; align-content: start; }
 .stack ul { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
 .stack li { font: 500 13px var(--mono); padding: 7px 13px; border: 1px solid var(--ink); border-radius: 999px; }
+
+/* The cat companion, walking along the bottom of the screen */
+.cat {
+  position: fixed;
+  left: 0;
+  bottom: env(safe-area-inset-bottom, 0px);
+  z-index: 9;
+  width: 72px;
+  height: 56px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  will-change: transform;
+}

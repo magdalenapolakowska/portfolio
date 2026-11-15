@@ -15,6 +15,7 @@ js/
   main.js           entry point; redraws canvases on theme or size change
   util.js           shared helpers
   theme.js          light and dark switch
+  cat.js            the cat that walks along the bottom of the screen
   hero.js           the interactive drawings in the hero
   projects.js       the animated project illustrations
 ```
