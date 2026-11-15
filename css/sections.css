@@ -102,6 +102,21 @@ h2 {
   border-bottom: 1px solid var(--line);
   align-items: baseline;
 }
+.role { display: flex; gap: 14px; align-items: flex-start; }
+.ico {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  color: var(--ink);
+  transition: color .2s, border-color .2s, transform .2s;
+}
+.ico svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.row:hover .ico { color: var(--accent); border-color: var(--accent); transform: rotate(-6deg); }
+@media (prefers-reduced-motion: reduce) { .row:hover .ico { transform: none; } }
 .row .years { font-variant-numeric: tabular-nums; }
 .row h3 { font: 600 20px var(--display); letter-spacing: -0.015em; margin: 0; }
 .row .org { color: var(--ink-soft); font-size: 15.5px; }
