@@ -250,7 +250,9 @@ h2 {
   margin: 0;
 }
 .about .side p { margin: 0 0 18px; max-width: 34em; }
-.stack { display: flex; align-items: baseline; gap: 12px 28px; flex-wrap: wrap; margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--line); }
+.tools { padding: 36px 0 40px; }
+.stack { display: flex; gap: 24px 48px; flex-wrap: wrap; margin-top: 18px; }
+.stack > div { display: grid; gap: 10px; align-content: start; }
 .stack ul { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
 .stack li { font: 500 13px var(--mono); padding: 7px 13px; border: 1px solid var(--ink); border-radius: 999px; }
 .skills { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 28px; }
@@ -376,6 +378,30 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
     </div>
   </div>
 
+  <section id="tools" class="tools">
+    <div class="wrap">
+      <span class="mono">Tools I work with</span>
+      <div class="stack">
+        <div>
+          <span class="mono">Languages</span>
+          <ul><li>Elm</li><li>TypeScript</li><li>JavaScript</li><li>HTML</li><li>CSS</li></ul>
+        </div>
+        <div>
+          <span class="mono">Frameworks</span>
+          <ul><li>Tailwind CSS</li><li>Astro</li></ul>
+        </div>
+        <div>
+          <span class="mono">Design</span>
+          <ul><li>Figma</li></ul>
+        </div>
+        <div>
+          <span class="mono">AI</span>
+          <ul><li>Claude Code</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="projects">
     <div class="wrap">
       <div class="head">
@@ -427,12 +453,6 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
           <p>I came to code through design. An AP degree in Multimedia Design and a bachelor's in Web Development mean I can take an idea from a design file to production without losing anything on the way.</p>
           <p>I still make art now and then. I went to art high school and spent a season painting miniatures, which is where my eye for small details comes from.</p>
         </div>
-      </div>
-      <div class="stack">
-        <span class="mono">Tools I've worked with</span>
-        <ul>
-          <li>HTML</li><li>CSS</li><li>JavaScript</li><li>TypeScript</li><li>Tailwind CSS</li><li>Astro</li><li>Figma</li><li>Claude Code</li>
-        </ul>
       </div>
     </div>
   </section>
