@@ -1,0 +1,37 @@
+/* Design tokens: colours for both themes, and the three typefaces.
+   Everything else on the site is built from these. */
+:root {
+  --paper: #ECEFE8;
+  --paper-2: #DFE4DA;
+  --ink: #16201B;
+  --ink-soft: #55615A;
+  --line: #C3CBBF;
+  --accent: #2A3EE0;
+  --hot: #F2622E;
+  --display: "Bricolage Grotesque", "Arial Narrow", Arial, sans-serif;
+  --body: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --mono: "DM Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0F1512;
+    --paper-2: #18211C;
+    --ink: #E6EBE3;
+    --ink-soft: #9AA69E;
+    --line: #2C3832;
+    --accent: #8E9CFF;
+    --hot: #FF8552;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0F1512;
+  --paper-2: #18211C;
+  --ink: #E6EBE3;
+  --ink-soft: #9AA69E;
+  --line: #2C3832;
+  --accent: #8E9CFF;
+  --hot: #FF8552;
+  color-scheme: dark;
+}

@@ -1,10 +1,29 @@
 # Portfolio
 
-A single-page portfolio site. Everything lives in `index.html`: content, styles and the script that draws the artwork.
+A single-page portfolio site with no build step and no frameworks.
+
+## Structure
+
+```
+index.html          the content
+css/
+  tokens.css        colours for light and dark, and the typefaces
+  base.css          reset and page defaults
+  components.css    navigation, theme switch, buttons, pills, tool tags
+  sections.css      hero, tools, projects, about, work, contact, and responsive rules
+js/
+  main.js           entry point; redraws canvases on theme or size change
+  util.js           shared helpers
+  theme.js          light and dark switch
+  hero.js           the interactive drawings in the hero
+  projects.js       the animated project illustrations
+```
 
 ## Editing
 
-Open `index.html` and replace the sample content: your name, the projects in the Work section, the About text, the Experience rows and the contact details. Remove the "Template" strip at the top of the page when you are done.
+Change the text in `index.html`. To restyle the whole site, start with the colour and font variables in `css/tokens.css`.
+
+The scripts are ES modules, so open the site through a local server (for example `python3 -m http.server`) instead of double-clicking `index.html`.
 
 ## Publishing
 

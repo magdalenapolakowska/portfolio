@@ -1,0 +1,87 @@
+/* Components: pieces reused across sections. */
+
+/* Top navigation and the light/dark switch */
+.nav { position: sticky; top: 0; z-index: 10; background: var(--paper); border-bottom: 1px solid var(--line); }
+.nav .wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+.nav .name {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+.nav ul { display: flex; gap: 22px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+.nav ul a { text-decoration: none; font-size: 15px; font-weight: 500; }
+.nav ul a:hover { color: var(--accent); }
+.theme {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color .2s, color .2s, transform .2s;
+}
+.theme:hover { border-color: var(--ink); color: var(--hot); transform: rotate(18deg); }
+.theme .orb, .theme .bite, .theme .rays { transform-box: fill-box; transform-origin: center; transition: transform .55s cubic-bezier(.5, 0, .2, 1.3), opacity .3s; }
+/* Dark: the sun swells, loses its rays and a bite slides in to make a crescent moon. */
+.theme.is-dark .orb { transform: scale(1.75); }
+.theme.is-dark .bite { transform: translate(-12px, 3px); }
+.theme.is-dark .rays { transform: rotate(-90deg) scale(0.3); opacity: 0; }
+.theme.is-dark:hover { color: var(--accent); transform: rotate(-18deg); }
+/* The new theme spreads from the button like a drop of ink. */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+@media (prefers-reduced-motion: reduce) { .theme, .theme .orb, .theme .bite, .theme .rays { transition: none; } }
+.nav nav { margin-left: auto; }
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  font: 600 15px var(--body);
+  padding: 12px 20px;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  text-decoration: none;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.btn.solid { background: var(--ink); color: var(--paper); }
+.btn:hover { background: var(--accent); border-color: var(--accent); color: var(--paper); }
+
+/* Pill buttons (the drawing picker) */
+.pills { display: flex; gap: 8px; flex-wrap: wrap; }
+.pills button {
+  font: 500 12.5px var(--mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.pills button:hover { border-color: var(--ink); }
+.pills button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.figs { margin-top: 12px; gap: 6px; }
+.figs button { padding: 7px 12px; }
+
+/* Tool tags */
+.stack { display: flex; gap: 28px 48px; flex-wrap: wrap; }
+.stack > div { display: grid; gap: 10px; align-content: start; }
+.stack ul { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.stack li { font: 500 13px var(--mono); padding: 7px 13px; border: 1px solid var(--ink); border-radius: 999px; }
