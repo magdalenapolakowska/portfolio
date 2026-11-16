@@ -8,6 +8,8 @@
   --line: #C3CBBF;
   --accent: #2A3EE0;
   --hot: #F2622E;
+  --cat: #16201B;
+  --cat-paw: #FFFFFF;
   --display: "Bricolage Grotesque", "Arial Narrow", Arial, sans-serif;
   --body: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
   --mono: "DM Mono", ui-monospace, Menlo, Consolas, monospace;
@@ -22,6 +24,7 @@
     --line: #2C3832;
     --accent: #8E9CFF;
     --hot: #FF8552;
+    --cat: #A9B2AA;
     color-scheme: dark;
   }
 }
@@ -33,5 +36,6 @@
   --line: #2C3832;
   --accent: #8E9CFF;
   --hot: #FF8552;
+  --cat: #A9B2AA;
   color-scheme: dark;
 }
