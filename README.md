@@ -6,6 +6,7 @@ A single-page portfolio site with no build step and no frameworks.
 
 ```
 index.html          the content
+images/             screenshots used in the case study
 css/
   tokens.css        colours for light and dark, and the typefaces
   base.css          reset and page defaults

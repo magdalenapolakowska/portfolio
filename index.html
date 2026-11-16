@@ -93,6 +93,10 @@
           <ul><li>Elm</li><li>TypeScript</li><li>JavaScript</li><li>HTML</li><li>CSS</li></ul>
         </div>
         <div>
+          <span class="mono">Frameworks</span>
+          <ul><li>React</li><li>Remix</li></ul>
+        </div>
+        <div>
           <span class="mono">Design systems</span>
           <ul><li>Design tokens</li><li>Accessibility (WCAG, ARIA)</li><li>Responsive design</li><li>Icon design</li><li>Tailwind CSS</li><li>Figma</li></ul>
         </div>
@@ -128,11 +132,58 @@
         <article class="card feature" data-kind="system">
           <canvas width="640" height="480" data-seed="11" aria-hidden="true"></canvas>
           <div>
-            <div class="meta mono"><span>Bachelor project</span><span>2022 to 2023</span></div>
+            <div class="meta mono"><span>Bachelor project</span><span>2022</span></div>
             <h3>Design System Template</h3>
             <p>Every company grows differently, and its design tends to get messier along the way. For my bachelor project I built a design system template a team can reuse and scale, so designers and engineers share one source of truth and keep talking to each other from day one.</p>
             <p class="tags mono">Web app / Design systems / Design</p>
           </div>
+          <details class="case">
+            <summary><span class="btn"><span class="when-closed">Read the case study</span><span class="when-open">Close the case study</span></span></summary>
+            <div class="case-body">
+              <div class="case-text">
+                <p class="case-title">The power of design systems: the connection between design and development</p>
+                <p class="mono">Bachelor thesis, written with input from designers and developers at Humio</p>
+                <h4 class="mono">The problem</h4>
+                <p>As a company grows, its designers and developers drift apart. Decisions live in people's heads, the same questions get answered again and again, and a rebrand or an acquisition means restyling everything by hand. A design system fixes this, but building one from scratch takes time most small teams don't have.</p>
+                <h4 class="mono">The questions</h4>
+                <ul>
+                  <li>How can a digital tool close the knowledge gap between designers and developers and give them a shared language?</li>
+                  <li>How can it automate the repetitive work on both sides?</li>
+                </ul>
+                <h4 class="mono">What I built</h4>
+                <ul>
+                  <li><strong>Design tokens that sync themselves.</strong> A designer changes a colour in Figma, the change is pushed to GitHub, and it becomes CSS variables and Tailwind classes in the code. Everyone ends up using the same names for the same things.</li>
+                  <li><strong>Light and dark mode throughout,</strong> driven by the same tokens.</li>
+                  <li><strong>A component library</strong> that shows every component in all its states and variants, on different backgrounds, with a page template to copy for each new one.</li>
+                  <li><strong>Navigation that builds itself</strong> from the list of components, grouped by category and searchable.</li>
+                  <li><strong>Foundation pages ready to fill in:</strong> colours, typography, spacing, a searchable icon library, accessibility, branding and tone of voice.</li>
+                </ul>
+                <h4 class="mono">How I got there</h4>
+                <p>I compared the design systems of Atlassian, Google, IBM and Apple, studied Storybook, and used industry survey data to decide what a design system has to contain.</p>
+                <h4 class="mono">Built with</h4>
+                <p>React, Remix, Tailwind CSS, Figma, the Figma Tokens plugin, Style Dictionary and GitHub.</p>
+                <h4 class="mono">What I'd add next</h4>
+                <p>Automated tests on every pull request, GitHub Actions that regenerate the styles when tokens change, and copyable code snippets for each component.</p>
+              </div>
+              <div class="case-figs">
+                <figure>
+                  <div class="pair">
+                    <img src="images/design-system/home-orange.webp" width="1400" height="874" loading="lazy" alt="The template's home page in dark mode with an orange brand colour, showing a side navigation and cards linking to each section.">
+                    <img src="images/design-system/home-blue.webp" width="1400" height="875" loading="lazy" alt="The same home page with a blue brand colour.">
+                  </div>
+                  <figcaption class="mono">One template, two brands. Only the tokens changed.</figcaption>
+                </figure>
+                <figure>
+                  <img src="images/design-system/tokens.webp" width="970" height="386" loading="lazy" alt="Generated CSS variables for light and dark background and text colours.">
+                  <figcaption class="mono">Colours arrive from Figma as CSS variables for both themes.</figcaption>
+                </figure>
+                <figure>
+                  <img src="images/design-system/routing.webp" width="1400" height="989" loading="lazy" alt="Diagram of the codebase: routes and example pages mapped to the URLs they produce.">
+                  <figcaption class="mono">How the pages nest: each component's example renders inside the library layout.</figcaption>
+                </figure>
+              </div>
+            </div>
+          </details>
         </article>
         <article class="card" data-kind="share">
           <canvas width="640" height="480" data-seed="27" aria-hidden="true"></canvas>
