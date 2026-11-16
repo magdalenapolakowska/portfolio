@@ -60,14 +60,32 @@ function paw(px, py, far, long) {
   fill(far ? P.whiteFar : P.white); ell(px, py, long || 6.2, 3.7, 0); ctx.fill();
   ctx.strokeStyle = P.edge; ctx.lineWidth = 0.8; ctx.stroke();
 }
-function leg(hx, hy, fx, fy, dir, far, hind) {
-  var l1 = hind ? 22 : 21, l2 = hind ? 22 : 21, j = knee(hx, hy, fx, fy, l1, l2, dir);
-  fill(far ? P.furFar : P.fur);
-  seg(hx, hy, j[0], j[1], hind ? 15 : 12, 9.5);
-  seg(j[0], j[1], fx, fy, 9.5, 7.4);
-  var mx = j[0] + (fx - j[0]) * 0.5, my = j[1] + (fy - j[1]) * 0.5; // the white sock
-  fill(far ? P.whiteFar : P.white); seg(mx, my, fx, fy, 8.2, 7.2);
-  paw(fx + 2.2, fy + 0.4, far);
+// A cat walks on its toes, so each leg has three visible parts.
+// Hind leg: thigh runs forward to the knee, shin runs back to the hock (the raised
+// heel), then the long foot drops to the toes. Front leg: the elbow is tucked back
+// against the chest, the forearm is nearly straight, and a short wrist meets the paw.
+function leg(hx, hy, toe, far, hind) {
+  var up = Math.max(0, Math.min(1, (GROUND - 3 - toe[1]) / 8)); // how far the paw is off the ground
+  var fur = far ? P.furFar : P.fur, white = far ? P.whiteFar : P.white;
+  if (hind) {
+    var hock = [toe[0] - 2.5 - up * 5, toe[1] - 12 + up * 3];
+    var kn = knee(hx, hy, hock[0], hock[1], 14.5, 15, -1);
+    fill(fur);
+    seg(hx, hy, kn[0], kn[1], 19, 12);            // thigh
+    seg(kn[0], kn[1], hock[0], hock[1], 10.5, 7);  // shin
+    var sx = hock[0] + (toe[0] - hock[0]) * 0.4, sy = hock[1] + (toe[1] - hock[1]) * 0.4;
+    seg(hock[0], hock[1], sx, sy, 7, 6.6);         // top of the foot, still brown
+    fill(white); seg(sx, sy, toe[0], toe[1], 6.8, 6.2); // the white sock
+  } else {
+    var wrist = [toe[0] - 1 + up * 4, toe[1] - 7 + up * 1.5];
+    var el = knee(hx, hy, wrist[0], wrist[1], 17.5, 20, 1);
+    fill(fur);
+    seg(hx, hy, el[0], el[1], 14, 10.5);             // upper arm
+    seg(el[0], el[1], wrist[0], wrist[1], 9.6, 7);   // forearm
+    var mx = el[0] + (wrist[0] - el[0]) * 0.55, my = el[1] + (wrist[1] - el[1]) * 0.55;
+    fill(white); seg(mx, my, wrist[0], wrist[1], 8, 7); seg(wrist[0], wrist[1], toe[0], toe[1], 7, 6.4); // sock
+  }
+  paw(toe[0] + 1.8, toe[1] + 0.5, far, 5.4);
 }
 function stripes(list, w) {
   ctx.strokeStyle = P.dark; ctx.lineWidth = w || 3.2; ctx.lineCap = 'round'; ctx.globalAlpha = 0.72;
@@ -137,17 +155,17 @@ function footAt(p, base, stride, lift) { // stance slides back along the ground,
   return [base - stride / 2 + stride * e, GROUND - 3 - lift * Math.sin(Math.PI * u)];
 }
 function poseStand(t, o) {
-  var stride = 34 * gait, lift = 8 * gait, ph = phase;
-  var bob = -6 + Math.sin(ph * Math.PI * 4) * 1.3 * gait, hb = -6 + Math.sin(ph * Math.PI * 4 + 1) * 1.1 * gait; // -6: she stands tall
+  var stride = 26 * gait, lift = 7 * gait, ph = phase;
+  var bob = -9 + Math.sin(ph * Math.PI * 4) * 1.3 * gait, hb = -9 + Math.sin(ph * Math.PI * 4 + 1) * 1.1 * gait; // -9: she stands tall
   function f(off, base) { return footAt(((ph + off) % 1 + 1) % 1, base, stride, lift); }
-  var nh = f(0, 54), nf = f(0.25, 104), fh = f(0.5, 60), ff = f(0.75, 110);
+  var nh = f(0, 53), nf = f(0.25, 106), fh = f(0.5, 59), ff = f(0.75, 112);
   shadow(82, 46);
   // tail: carried high, the motion travels down it with a delay
   var a = [], sw = 0.16 + 0.1 * gait;
   for (var i = 0; i < 15; i++) a.push(Math.PI * 1.04 + i * 0.15 + Math.sin(t * (1.6 + gait * 3) - i * 0.42) * sw * (0.4 + i / 15) + (o.happy ? Math.sin(t * 22) * 0.05 * i / 15 - 0.25 * i / 15 : 0));
   tail(47, 70 + bob, a, 4.1);
-  leg(60, 84 + bob, fh[0], fh[1], -1, true, true);
-  leg(108, 84 + bob, ff[0], ff[1], 1, true, false);
+  leg(62, 85 + bob, fh, true, true);
+  leg(109, 85 + bob, ff, true, false);
   // body
   ctx.beginPath();
   ctx.moveTo(113, 66 + bob);
@@ -164,15 +182,15 @@ function poseStand(t, o) {
   fill(P.belly); ctx.beginPath(); ctx.moveTo(60, 97 + bob);
   for (i = 0; i < 6; i++) { ctx.lineTo(64 + i * 7, 104 + bob + (i % 2) * 1.5); ctx.lineTo(67.5 + i * 7, 98 + bob); }
   ctx.fill();
-  leg(54, 85 + bob, nh[0], nh[1], -1, false, true);
-  leg(102, 85 + bob, nf[0], nf[1], 1, false, false);
+  leg(56, 86 + bob, nh, false, true);
+  leg(104, 86 + bob, nf, false, false);
   fill(P.fur); seg(108, 74 + bob, 122, 60 + hb, 22, 19);
   bib([[108, 66], [122, 66], [126, 73], [121, 75], [124, 82], [118, 82], [119, 90], [113, 88], [110, 95], [106, 86], [103, 78]], bob);
   head(127, 55 + hb, -0.04 + (o.tilt || 0), o);
 }
 function poseSit(t, o) {
   shadow(80, 40);
-  leg(96, 84, 99, 114, 1, true, false);
+  leg(97, 84, [100, 114.5], true, false);
   // body
   ctx.beginPath();
   ctx.moveTo(101, 60);
@@ -225,7 +243,7 @@ function poseSleep(t) {
   tail(47, 102, a, 4.2);
   // zzz
   fill(token('--ink-soft') || '#777'); ctx.font = '700 11px ui-monospace, Menlo, monospace';
-  for (i = 0; i < 2; i++) { var u = (t * 0.16 + i * 0.5) % 1; ctx.globalAlpha = Math.sin(u * Math.PI) * 0.85; ctx.fillText('z', 138 + u * 10, 78 - u * 26); }
+  for (i = 0; i < 2; i++) { var u = (t * 0.16 + i * 0.5) % 1; ctx.globalAlpha = Math.sin(u * Math.PI) * 0.85; ctx.save(); ctx.translate(138 + u * 10, 78 - u * 26); ctx.scale(flip < 0 ? -1 : 1, 1); ctx.fillText('z', 0, 0); ctx.restore(); } // keep the z readable when she faces left
   ctx.globalAlpha = 1;
 }
 function hearts(u) {
@@ -280,7 +298,7 @@ function tick(now) {
   var dt = Math.min(50, now - last) / 16.7; last = now;
   if (++frame % 120 === 1) whisker = document.documentElement.matches('[data-theme="dark"]') || (!document.documentElement.dataset.theme && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'rgba(240,240,230,.55)' : 'rgba(40,30,20,.5)';
   var gap = goal() - x, busy = now < petUntil;
-  var top = (Math.abs(gap) > 220 ? 5 : 1.7) * k / 0.8; // a walk when close, a trot when far behind
+  var top = (Math.abs(gap) > 220 ? 4.4 : 1.4) * k / 0.8; // a walk when close, a trot when far behind
   var want = busy || Math.abs(gap) < 3 ? 0 : Math.max(-top, Math.min(top, gap * 0.045));
   if (want && Math.abs(want) < 0.5) want = gap > 0 ? 0.5 : -0.5;
   vel += (want - vel) * 0.14 * dt;
@@ -290,8 +308,8 @@ function tick(now) {
     x += vel * dt; since = now;
     if (Math.abs(gap) > 6) facing = gap > 0 ? 1 : -1;
     // One step cycle covers the ground her feet push over, so they do not slide; a trot stretches it.
-    var trot = Math.max(0, Math.min(1, (Math.abs(vel) * 0.8 / k - 1.7) / 3.3));
-    phase = (phase + Math.abs(vel) * dt / (34 / 0.6 * k * (1 + trot * 1.3))) % 1;
+    var trot = Math.max(0, Math.min(1, (Math.abs(vel) * 0.8 / k - 1.4) / 3));
+    phase = (phase + Math.abs(vel) * dt / (26 / 0.6 * k * (1 + trot * 1.3))) % 1;
     gait += (Math.min(1, Math.abs(vel) / (1.1 * k / 0.8)) - gait) * 0.2;
   } else {
     vel = 0; gait += (0 - gait) * 0.18;
