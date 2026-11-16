@@ -83,6 +83,9 @@
 /* Tool tags */
 .stack { display: flex; gap: 28px 48px; flex-wrap: wrap; }
 .stack > div { display: grid; gap: 10px; align-content: start; }
+.stack-head { display: flex; align-items: center; gap: 10px; }
+.stack-head .ico { width: 32px; height: 32px; border-radius: 9px; }
+.stack > div:hover .ico { color: var(--accent); border-color: var(--accent); transform: rotate(-6deg); }
 .stack ul { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
 .stack li { font: 500 13px var(--mono); padding: 7px 13px; border: 1px solid var(--ink); border-radius: 999px; }
 
