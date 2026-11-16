@@ -3,7 +3,7 @@
 
 import { root } from './util.js';
 import './theme.js';
-import './cat.js';
+// import './cat.js'; // Lulu is resting for now. Uncomment this line to bring her back.
 import { canvas, start as restartHero } from './hero.js';
 import { refresh as refreshProjects } from './projects.js';
 
