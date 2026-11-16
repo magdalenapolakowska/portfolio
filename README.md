@@ -28,6 +28,21 @@ Change the text in `index.html`. To restyle the whole site, start with the colou
 
 The scripts are ES modules, so open the site through a local server (for example `python3 -m http.server`) instead of double-clicking `index.html`.
 
+## Design rules
+
+These apply to everything on the site.
+
+- **Nested rounded corners:** inner radius = outer radius minus the padding between them.
+- **Borders:** alpha colours, not solid hex, so they blend into any background.
+- **Palettes:** built in OKLCH, so equal lightness looks equal.
+- **Gradients:** interpolate `in oklch`, so they don't go grey in the middle.
+- **Icons:** stroke width matches the weight of the text beside the icon.
+- **Carousels:** fade the edges with `mask: linear-gradient(90deg, transparent, black 15% 85%, transparent)`.
+- **Icon swaps:** the outgoing icon blurs (`filter: blur(4px)`) as it fades out.
+- **Dark mode:** depth comes from lighter surfaces, since shadows barely show.
+- **Full-height sections:** `100dvh`, not `100vh`, which breaks in Safari.
+- **Images on a white background:** `mix-blend-mode: multiply`, so the white disappears.
+
 ## Publishing
 
 Pushing to `main` deploys the site to GitHub Pages at https://magdalenapolakowska.github.io/portfolio/ (repository Settings > Pages > Source must be set to "GitHub Actions").

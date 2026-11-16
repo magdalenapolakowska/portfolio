@@ -90,8 +90,8 @@ dialog.case {
   max-height: calc(100dvh - 48px);
   padding: 0;
   border: 1px solid var(--line);
-  border-radius: 16px;
-  background: var(--paper);
+  border-radius: var(--radius-panel);
+  background: var(--raised);
   color: var(--ink);
   overflow: hidden;
   box-shadow: 0 30px 80px rgba(0, 0, 0, .35);
@@ -105,14 +105,15 @@ dialog.case.fallback { position: fixed; inset: 0; z-index: 50; width: 100%; heig
 .case-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; padding: 22px 28px; border-bottom: 1px solid var(--line); }
 .case-head h2 { font-size: clamp(20px, 2.4vw, 28px); line-height: 1.15; letter-spacing: -0.02em; max-width: 26em; margin-top: 8px; }
 .case-head .btn { flex: none; padding: 9px 18px; }
-.case-body { display: grid; grid-template-columns: 1.1fr 1fr; gap: 44px; padding: 28px; overflow-y: auto; overscroll-behavior: contain; }
+.case-body { display: grid; grid-template-columns: 1.1fr 1fr; gap: 44px; padding: var(--pad-panel); overflow-y: auto; overscroll-behavior: contain; }
 .case-text { display: grid; gap: 12px; align-content: start; }
 .case-text h4 { font-weight: 500; margin: 18px 0 0; }
 .case-text p, .case-text li { font-size: 16px; color: var(--ink); max-width: 36em; margin: 0; }
 .case-text p.mono { font-size: 12.5px; color: var(--ink-soft); }
 .case-text ul { margin: 0; padding-left: 1.1em; display: grid; gap: 8px; }
 .case-figs { display: grid; gap: 28px; align-content: start; }
-.case-figs img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; }
+.case-figs img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: var(--radius-in-panel); }
+.case-figs img.on-white { mix-blend-mode: var(--blend-on-white); } /* white backgrounds disappear into the panel */
 .case-figs .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
 /* About */
@@ -149,7 +150,8 @@ dialog.case.fallback { position: fixed; inset: 0; z-index: 50; width: 100%; heig
   color: var(--ink);
   transition: color .2s, border-color .2s, transform .2s;
 }
-.ico svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+/* Icon strokes match the weight of the text beside them: 2.2 next to the semibold job titles. */
+.ico svg { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .row:hover .ico { color: var(--accent); border-color: var(--accent); transform: rotate(-6deg); }
 @media (prefers-reduced-motion: reduce) { .row:hover .ico { transform: none; } }
 .row .years { font-variant-numeric: tabular-nums; }

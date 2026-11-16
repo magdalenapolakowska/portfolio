@@ -35,11 +35,11 @@
   transition: border-color .2s, color .2s, transform .2s;
 }
 .theme:hover { border-color: var(--ink); color: var(--hot); transform: rotate(18deg); }
-.theme .orb, .theme .bite, .theme .rays { transform-box: fill-box; transform-origin: center; transition: transform .55s cubic-bezier(.5, 0, .2, 1.3), opacity .3s; }
+.theme .orb, .theme .bite, .theme .rays { transform-box: fill-box; transform-origin: center; transition: transform .55s cubic-bezier(.5, 0, .2, 1.3), opacity .3s, filter .3s; }
 /* Dark: the sun swells, loses its rays and a bite slides in to make a crescent moon. */
 .theme.is-dark .orb { transform: scale(1.75); }
 .theme.is-dark .bite { transform: translate(-12px, 3px); }
-.theme.is-dark .rays { transform: rotate(-90deg) scale(0.3); opacity: 0; }
+.theme.is-dark .rays { transform: rotate(-90deg) scale(0.3); opacity: 0; filter: blur(4px); } /* the outgoing icon blurs as it fades */
 .theme.is-dark:hover { color: var(--accent); transform: rotate(-18deg); }
 /* The new theme spreads from the button like a drop of ink. */
 ::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
@@ -85,6 +85,7 @@
 .stack > div { display: grid; gap: 10px; align-content: start; }
 .stack-head { display: flex; align-items: center; gap: 10px; }
 .stack-head .ico { width: 32px; height: 32px; border-radius: 9px; }
+.stack-head .ico svg { stroke-width: 1.5; } /* lighter, to match the small medium-weight labels */
 .stack > div:hover .ico { color: var(--accent); border-color: var(--accent); transform: rotate(-6deg); }
 .stack ul { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
 .stack li { font: 500 13px var(--mono); padding: 7px 13px; border: 1px solid var(--ink); border-radius: 999px; }

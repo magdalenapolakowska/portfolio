@@ -1,37 +1,73 @@
-/* Design tokens: colours for both themes, and the three typefaces.
-   Everything else on the site is built from these. */
+/* Design tokens: colours for both themes, radii and the three typefaces.
+   Everything else on the site is built from these.
+
+   Colours are written in OKLCH (lightness, chroma, hue), so two colours with
+   the same lightness really do look equally light. Hairlines are the ink colour
+   at low alpha, so they blend into whatever surface they sit on. */
 :root {
-  --paper: #ECEFE8;
-  --paper-2: #DFE4DA;
-  --ink: #16201B;
-  --ink-soft: #55615A;
-  --line: #C3CBBF;
-  --accent: #2A3EE0;
-  --hot: #F2622E;
+  --paper: oklch(94.8% 0.010 126);
+  --paper-2: oklch(91.2% 0.014 129);
+  --raised: oklch(94.8% 0.010 126);          /* panels floating above the page */
+  --ink: oklch(23.2% 0.017 163);
+  --ink-soft: oklch(48% 0.019 160);
+  --line: oklch(23.2% 0.017 163 / 0.18);
+  --accent: oklch(47.4% 0.241 268);
+  --hot: oklch(67.3% 0.189 39);
+  --blend-on-white: multiply;                /* lets white-backed images sink into the page */
+
+  --radius-panel: 16px;
+  --pad-panel: 28px;
+  /* A rounded thing inside a rounded thing: inner radius = outer radius - padding. */
+  --radius-in-panel: max(0px, calc(var(--radius-panel) - var(--pad-panel)));
+
   --display: "Bricolage Grotesque", "Arial Narrow", Arial, sans-serif;
   --body: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
   --mono: "DM Mono", ui-monospace, Menlo, Consolas, monospace;
   color-scheme: light;
 }
+/* Dark: shadows barely show, so depth comes from lighter surfaces instead.
+   The two accents share one lightness here. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #0F1512;
-    --paper-2: #18211C;
-    --ink: #E6EBE3;
-    --ink-soft: #9AA69E;
-    --line: #2C3832;
-    --accent: #8E9CFF;
-    --hot: #FF8552;
+    --paper: oklch(18.8% 0.011 164);
+    --paper-2: oklch(23.7% 0.016 161);
+    --raised: oklch(27.5% 0.016 161);
+    --ink: oklch(93.4% 0.012 133);
+    --ink-soft: oklch(71.3% 0.018 157);
+    --line: oklch(93.4% 0.012 133 / 0.15);
+    --accent: oklch(73.5% 0.144 276);
+    --hot: oklch(73.5% 0.162 42);
+    --blend-on-white: normal;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --paper: #0F1512;
-  --paper-2: #18211C;
-  --ink: #E6EBE3;
-  --ink-soft: #9AA69E;
-  --line: #2C3832;
-  --accent: #8E9CFF;
-  --hot: #FF8552;
+  --paper: oklch(18.8% 0.011 164);
+  --paper-2: oklch(23.7% 0.016 161);
+  --raised: oklch(27.5% 0.016 161);
+  --ink: oklch(93.4% 0.012 133);
+  --ink-soft: oklch(71.3% 0.018 157);
+  --line: oklch(93.4% 0.012 133 / 0.15);
+  --accent: oklch(73.5% 0.144 276);
+  --hot: oklch(73.5% 0.162 42);
+  --blend-on-white: normal;
   color-scheme: dark;
+}
+
+/* Older browsers without OKLCH get the same palette in hex. */
+@supports not (color: oklch(0% 0 0)) {
+  :root {
+    --paper: #ECEFE8; --paper-2: #DFE4DA; --raised: #ECEFE8; --ink: #16201B; --ink-soft: #55615A;
+    --line: rgb(22 32 27 / 0.18); --accent: #2A3EE0; --hot: #F2622E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0F1512; --paper-2: #18211C; --raised: #212B26; --ink: #E6EBE3; --ink-soft: #9AA69E;
+      --line: rgb(230 235 227 / 0.15); --accent: #8E9CFF; --hot: #FF8552;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0F1512; --paper-2: #18211C; --raised: #212B26; --ink: #E6EBE3; --ink-soft: #9AA69E;
+    --line: rgb(230 235 227 / 0.15); --accent: #8E9CFF; --hot: #FF8552;
+  }
 }
