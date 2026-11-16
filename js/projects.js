@@ -83,65 +83,6 @@ function drawSystem(c, r, p, t) {
   }
 }
 
-/* RawShare: plates of food shared with the homes nearest to you */
-function drawShare(c, r, p, t) {
-  var i, k;
-  c.fillStyle = p.bg; c.fillRect(0, 0, 640, 480);
-  // streets
-  c.strokeStyle = p.paper; c.lineCap = 'round';
-  for (i = 0; i < 5; i++) {
-    c.lineWidth = 10 + r() * 8;
-    var y0 = 40 + i * 100 + r() * 40, tilt = (r() - 0.5) * 120;
-    c.beginPath(); c.moveTo(-20, y0); c.lineTo(660, y0 + tilt); c.stroke();
-  }
-  for (i = 0; i < 6; i++) {
-    c.lineWidth = 10 + r() * 8;
-    var x0 = 30 + i * 115 + r() * 40, lean = (r() - 0.5) * 120;
-    c.beginPath(); c.moveTo(x0, -20); c.lineTo(x0 + lean, 500); c.stroke();
-  }
-  // homes, kept apart from each other
-  var me = { x: 300 + r() * 40, y: 225 + r() * 30 }, homes = [], tries = 0;
-  while (homes.length < 16 && tries++ < 600) {
-    var h = { x: 40 + r() * 560, y: 40 + r() * 400 }, ok = Math.hypot(h.x - me.x, h.y - me.y) > 70;
-    for (k = 0; k < homes.length && ok; k++) ok = Math.hypot(h.x - homes[k].x, h.y - homes[k].y) > 74;
-    if (ok) homes.push(h);
-  }
-  var R = 175;
-  // the nearest area
-  c.fillStyle = p.accent; c.globalAlpha = 0.08; c.beginPath(); c.arc(me.x, me.y, R, 0, Math.PI * 2); c.fill();
-  c.globalAlpha = 1; c.strokeStyle = p.accent; c.lineWidth = 2; c.setLineDash([3, 9]);
-  c.beginPath(); c.arc(me.x, me.y, R, 0, Math.PI * 2); c.stroke();
-  c.beginPath(); c.arc(me.x, me.y, R * 0.55, 0, Math.PI * 2); c.stroke();
-  // a ripple going out from you
-  var rp = (t * 38) % R;
-  c.setLineDash([]); c.globalAlpha = 1 - rp / R; c.beginPath(); c.arc(me.x, me.y, rp, 0, Math.PI * 2); c.stroke(); c.globalAlpha = 1;
-  // links to neighbours in range
-  c.strokeStyle = p.ink; c.lineWidth = 2; c.setLineDash([2, 7]); c.lineDashOffset = -t * 14;
-  homes.forEach(function (h) {
-    h.near = Math.hypot(h.x - me.x, h.y - me.y) < R - 14;
-    if (h.near) { c.beginPath(); c.moveTo(me.x, me.y); c.lineTo(h.x, h.y); c.stroke(); }
-  });
-  c.setLineDash([]); c.lineDashOffset = 0;
-  // food on its way
-  homes.forEach(function (h, k) {
-    if (!h.near) return;
-    var u = (t * 0.3 + k * 0.37) % 1;
-    c.fillStyle = p.hot; c.beginPath(); c.arc(me.x + (h.x - me.x) * u, me.y + (h.y - me.y) * u, 6, 0, Math.PI * 2); c.fill();
-  });
-  homes.forEach(function (h, k) {
-    if (h.near) { // a plate
-      c.fillStyle = p.paper; c.beginPath(); c.arc(h.x, h.y, 19, 0, Math.PI * 2); c.fill();
-      c.strokeStyle = p.ink; c.lineWidth = 2; c.beginPath(); c.arc(h.x, h.y, 19, 0, Math.PI * 2); c.stroke();
-      c.fillStyle = p.hot; c.beginPath(); c.arc(h.x, h.y, 10 + 2 * Math.sin(t * 2 + k), 0, Math.PI * 2); c.fill();
-    } else { // a home out of range
-      c.fillStyle = p.line; c.beginPath(); c.arc(h.x, h.y, 8, 0, Math.PI * 2); c.fill();
-    }
-  });
-  // you
-  c.fillStyle = p.accent; c.beginPath(); c.arc(me.x, me.y, 24, 0, Math.PI * 2); c.fill();
-  c.fillStyle = p.paper; c.beginPath(); c.arc(me.x, me.y, 9, 0, Math.PI * 2); c.fill();
-}
-
 /* InTeam: companies on the left, students on the right, and the matches between them */
 function drawMatch(c, r, p, t) {
   var n = 6, i, k, L = [], S = [], apps = [];
@@ -206,7 +147,6 @@ function drawThumbs(t) {
     c.setTransform(1, 0, 0, 1, 0, 0); c.setLineDash([]); c.lineDashOffset = 0; c.globalAlpha = 1; c.lineCap = 'butt';
     c.clearRect(0, 0, 640, 480);
     if (card.dataset.kind === 'system') drawSystem(c, r, pal, t);
-    else if (card.dataset.kind === 'share') drawShare(c, r, pal, t);
     else drawMatch(c, r, pal, t);
   });
 }
