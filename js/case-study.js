@@ -4,10 +4,16 @@
 var dialog = document.getElementById('case');
 var opener = document.getElementById('open-case');
 
-function close() { dialog.close(); }
+// Older phones have no built-in dialog support, so fall back to a plain full-screen panel.
+var native = typeof dialog.showModal === 'function';
+function close() {
+  if (native) dialog.close();
+  else { dialog.removeAttribute('open'); dialog.classList.remove('fallback'); dialog.dispatchEvent(new Event('close')); }
+}
 
 opener.addEventListener('click', function () {
-  dialog.showModal();
+  if (native) dialog.showModal();
+  else { dialog.setAttribute('open', ''); dialog.classList.add('fallback'); }
   dialog.querySelector('.case-body').scrollTop = 0;
   document.documentElement.classList.add('dialog-open'); // stop the page behind from scrolling
 });
